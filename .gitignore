@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 # Usual build directory
-build*
+build*/
+!build.sh
 
 # Benchmark results directories
 results
