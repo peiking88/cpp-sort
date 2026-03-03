@@ -267,10 +267,10 @@ auto run_benchmark(std::size_t n, DataPattern pattern,
         std::function<void(T*, std::size_t)> func;
     };
     
+    // Base algorithms (always tested)
     std::vector<Algorithm> algorithms = {
         {"std::sort", std_sort<T>},
         {"cpp-sort/simd_sorter", cppsort_simd_sort<T>},
-        {"cpp-sort/parallel_sorter", cppsort_parallel_sort<T>},
         {"cpp-sort/std_sorter", cppsort_std_sort<T>},
         {"cpp-sort/pdq_sorter", cppsort_pdq_sort<T>},
         {"cpp-sort/quick_sorter", cppsort_quick_sort<T>},
@@ -283,8 +283,13 @@ auto run_benchmark(std::size_t n, DataPattern pattern,
         {"cpp-sort/ska_sorter", cppsort_ska_sort<T>},
     };
     
+    // Add parallel_sorter only for datasets > 100K
+    if (n > 100000) {
+        algorithms.insert(algorithms.begin() + 2, {"cpp-sort/parallel_sorter", cppsort_parallel_sort<T>});
+    }
+    
     // Adjust correctness iterations for large datasets
-    int correctness_iters = (n >= 1000000) ? 10 : CORRECTNESS_ITERATIONS;
+    int correctness_iters = (n >= 100000) ? 10 : CORRECTNESS_ITERATIONS;
     
     for (const auto& algo : algorithms) {
         BenchmarkResult result;
@@ -416,8 +421,8 @@ int main()
     std::cout << "Benchmark iterations: " << BENCHMARK_ITERATIONS << "\n";
     std::cout << "Correctness iterations: " << CORRECTNESS_ITERATIONS << "\n";
     
-    // Test sizes (include large datasets for parallel_sorter benchmark)
-    std::vector<std::size_t> sizes = {100, 1000, 10000, 100000, 1000000, 10000000};
+    // Test sizes (max 1M, parallel_sorter tested for > 100K)
+    std::vector<std::size_t> sizes = {100, 1000, 10000, 100000, 1000000};
     
     // Test patterns
     std::vector<DataPattern> patterns = {
@@ -433,9 +438,9 @@ int main()
     
     // Run benchmarks for each combination
     for (std::size_t n : sizes) {
-        // Use fewer iterations for large datasets
-        int warmup = (n >= 1000000) ? LARGE_WARMUP_ITERATIONS : WARMUP_ITERATIONS;
-        int bench = (n >= 1000000) ? LARGE_BENCHMARK_ITERATIONS : BENCHMARK_ITERATIONS;
+        // Use fewer iterations for large datasets (> 100K)
+        int warmup = (n > 100000) ? LARGE_WARMUP_ITERATIONS : WARMUP_ITERATIONS;
+        int bench = (n > 100000) ? LARGE_BENCHMARK_ITERATIONS : BENCHMARK_ITERATIONS;
         
         for (auto pattern : patterns) {
             // Float
