@@ -39,10 +39,11 @@ endif()
 add_library(cpp-sort INTERFACE)
 target_include_directories(cpp-sort INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/libfork/include>
     $<INSTALL_INTERFACE:include>
 )
 
-target_compile_features(cpp-sort INTERFACE cxx_std_17)
+target_compile_features(cpp-sort INTERFACE cxx_std_20)
 
 # MSVC won't work without a stricter standard compliance
 if (MSVC)

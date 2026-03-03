@@ -1,0 +1,3 @@
+[submodule "external/libfork"]
+	path = external/libfork
+	url = https://bgithub.xyz/ConorWilliams/libfork.git

@@ -11,7 +11,7 @@
 > since there are some applications in which they turn out to be best.*
 > — Donald Knuth, The Art Of Computer Programming, Volume 3
 
-**cpp-sort** is a generic C++17 header-only sorting library. It revolves
+**cpp-sort** is a generic C++20 header-only sorting library. It revolves
 around one main generic sorting interface and provides several small tools
 to pick and/or design sorting algorithms. Using its basic sorting features
 should be trivial enough:
@@ -70,6 +70,48 @@ int main()
 
 For unsupported types or when SIMD is unavailable, `simd_sorter` automatically 
 falls back to `std::sort`, ensuring correctness and portability.
+
+## Parallel Sorting
+
+cpp-sort includes **`parallel_sorter`**, a parallel merge sort implementation 
+powered by [libfork](https://github.com/ConorWilliams/libfork) for large datasets. 
+It automatically enables parallel sorting for datasets with **1 million or more elements**, 
+falling back to sequential `std::sort` for smaller datasets.
+
+```cpp
+#include <vector>
+#include <cpp-sort/sorters/parallel_sorter.h>
+
+int main()
+{
+    // Large dataset (>= 1M elements) - uses parallel merge sort
+    std::vector<int> large_data(2'000'000);
+    cppsort::parallel_sort(large_data);
+    
+    // Small dataset (< 1M elements) - uses sequential std::sort
+    std::vector<int> small_data(1000);
+    cppsort::parallel_sort(small_data);
+    
+    return 0;
+}
+```
+
+### Features
+- **Automatic threshold**: Parallel sorting activates for >= 1,000,000 elements
+- **NUMA-aware**: Uses libfork's work-stealing scheduler optimized for NUMA systems
+- **Low overhead**: Leverages C++20 coroutines for efficient task management
+- **Fallback support**: Gracefully falls back to `std::sort` when:
+  - Dataset size is below threshold
+  - C++20 coroutine support is unavailable
+
+### Performance
+Expected speedup on multi-core systems for large datasets:
+
+| CPU Cores | Expected Speedup |
+|-----------|-----------------|
+| 8 cores   | 4-6x            |
+| 16 cores  | 8-12x           |
+| 32+ cores | 15-25x          |
 
 _Note: older versions of the library targeting C++14 are still available in the `1.x.y-develop`
 and `1.x.y-stable`, but they are not actively developed anymore. Open an issue if you need
@@ -165,9 +207,9 @@ page][benchmarks].
 ![MinGW-w64 builds status](https://github.com/Morwenn/cpp-sort/actions/workflows/build-mingw.yml/badge.svg?branch=2.x.y-develop)
 ![MacOS builds status](https://github.com/Morwenn/cpp-sort/actions/workflows/build-macos.yml/badge.svg?branch=2.x.y-develop)
 
-**cpp-sort** requires C++17 support, and should work with the following compilers:
-* g++-9 or more recent.
-* clang++-11 or more recent (with both libstdc++ and libc++).
+**cpp-sort** requires C++20 support, and should work with the following compilers:
+* g++-11 or more recent.
+* clang++-13 or more recent (with both libstdc++ and libc++).
 * The versions of MinGW-w64 and AppleClang equivalent to the compilers mentioned above.
 * Visual Studio 2022 version 17.14.36414.22 or more recent, only with `/permissive-`. A few features are unavailable.
 * clang-cl corresponding the the Visual Studio version above.
@@ -275,6 +317,9 @@ one provided by M. D. McIlroy in [*A Killer Adversary for Quicksort*](https://ww
 * The SIMD-optimized sorting implementation in `simd_sorter` comes from Intel's 
 [x86-simd-sort](https://github.com/intel/x86-simd-sort) library, which provides 
 AVX2 and AVX-512 accelerated sorting for primitive types.
+
+* The parallel sorting implementation in `parallel_sorter` uses [libfork](https://github.com/ConorWilliams/libfork),
+a lock-free, wait-free, continuation-stealing coroutine tasking library built on C++20 coroutines.
 
 * The test suite reimplements random number algorithms originally found in the following places:
   - [xoshiro256\*\*](https://prng.di.unimi.it/)
