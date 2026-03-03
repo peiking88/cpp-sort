@@ -30,6 +30,7 @@
 #include <cpp-sort/sorters/spread_sorter.h>
 #include <cpp-sort/sorters/ska_sorter.h>
 #include <cpp-sort/sorters/simd_sorter.h>
+#include <cpp-sort/sorters/parallel_sorter.h>
 
 ////////////////////////////////////////////////////////////
 // Test configuration
@@ -38,6 +39,8 @@
 constexpr int WARMUP_ITERATIONS = 10;
 constexpr int BENCHMARK_ITERATIONS = 100;
 constexpr int CORRECTNESS_ITERATIONS = 100;
+constexpr int LARGE_WARMUP_ITERATIONS = 3;
+constexpr int LARGE_BENCHMARK_ITERATIONS = 10;
 
 ////////////////////////////////////////////////////////////
 // Timing utilities
@@ -205,6 +208,13 @@ void cppsort_simd_sort(T* arr, std::size_t n) {
     sorter(arr, arr + n);
 }
 
+// cpp-sort parallel_sorter (uses libfork for large datasets)
+template<typename T>
+void cppsort_parallel_sort(T* arr, std::size_t n) {
+    cppsort::parallel_sorter sorter;
+    sorter(arr, arr + n);
+}
+
 // std::sort reference
 template<typename T>
 void std_sort(T* arr, std::size_t n) {
@@ -243,7 +253,9 @@ struct BenchmarkResult {
 };
 
 template<typename T>
-auto run_benchmark(std::size_t n, DataPattern pattern) -> std::vector<BenchmarkResult>
+auto run_benchmark(std::size_t n, DataPattern pattern, 
+                   int warmup_iters = WARMUP_ITERATIONS,
+                   int bench_iters = BENCHMARK_ITERATIONS) -> std::vector<BenchmarkResult>
 {
     std::vector<BenchmarkResult> results;
     
@@ -258,6 +270,7 @@ auto run_benchmark(std::size_t n, DataPattern pattern) -> std::vector<BenchmarkR
     std::vector<Algorithm> algorithms = {
         {"std::sort", std_sort<T>},
         {"cpp-sort/simd_sorter", cppsort_simd_sort<T>},
+        {"cpp-sort/parallel_sorter", cppsort_parallel_sort<T>},
         {"cpp-sort/std_sorter", cppsort_std_sort<T>},
         {"cpp-sort/pdq_sorter", cppsort_pdq_sort<T>},
         {"cpp-sort/quick_sorter", cppsort_quick_sort<T>},
@@ -270,13 +283,16 @@ auto run_benchmark(std::size_t n, DataPattern pattern) -> std::vector<BenchmarkR
         {"cpp-sort/ska_sorter", cppsort_ska_sort<T>},
     };
     
+    // Adjust correctness iterations for large datasets
+    int correctness_iters = (n >= 1000000) ? 10 : CORRECTNESS_ITERATIONS;
+    
     for (const auto& algo : algorithms) {
         BenchmarkResult result;
         result.algorithm = algo.name;
         
         // Verify correctness
         result.correct = true;
-        for (int i = 0; i < CORRECTNESS_ITERATIONS && result.correct; ++i) {
+        for (int i = 0; i < correctness_iters && result.correct; ++i) {
             result.correct = verify_correctness<decltype(algo.func), T>(algo.func, n, pattern);
         }
         
@@ -290,21 +306,21 @@ auto run_benchmark(std::size_t n, DataPattern pattern) -> std::vector<BenchmarkR
         auto data = original;
         
         // Warmup
-        for (int i = 0; i < WARMUP_ITERATIONS; ++i) {
+        for (int i = 0; i < warmup_iters; ++i) {
             data = original;
             algo.func(data.data(), n);
         }
         
         // Benchmark
         auto start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < BENCHMARK_ITERATIONS; ++i) {
+        for (int i = 0; i < bench_iters; ++i) {
             data = original;
             algo.func(data.data(), n);
         }
         auto end = std::chrono::high_resolution_clock::now();
         
         std::chrono::duration<double, std::micro> duration = end - start;
-        result.time_us = duration.count() / BENCHMARK_ITERATIONS;
+        result.time_us = duration.count() / bench_iters;
         
         results.push_back(result);
     }
@@ -400,8 +416,8 @@ int main()
     std::cout << "Benchmark iterations: " << BENCHMARK_ITERATIONS << "\n";
     std::cout << "Correctness iterations: " << CORRECTNESS_ITERATIONS << "\n";
     
-    // Test sizes
-    std::vector<std::size_t> sizes = {100, 1000, 10000, 100000, 1000000};
+    // Test sizes (include large datasets for parallel_sorter benchmark)
+    std::vector<std::size_t> sizes = {100, 1000, 10000, 100000, 1000000, 10000000};
     
     // Test patterns
     std::vector<DataPattern> patterns = {
@@ -417,21 +433,25 @@ int main()
     
     // Run benchmarks for each combination
     for (std::size_t n : sizes) {
+        // Use fewer iterations for large datasets
+        int warmup = (n >= 1000000) ? LARGE_WARMUP_ITERATIONS : WARMUP_ITERATIONS;
+        int bench = (n >= 1000000) ? LARGE_BENCHMARK_ITERATIONS : BENCHMARK_ITERATIONS;
+        
         for (auto pattern : patterns) {
             // Float
-            auto results_float = run_benchmark<float>(n, pattern);
+            auto results_float = run_benchmark<float>(n, pattern, warmup, bench);
             print_results(results_float, "float", n, pattern);
             
             // Double
-            auto results_double = run_benchmark<double>(n, pattern);
+            auto results_double = run_benchmark<double>(n, pattern, warmup, bench);
             print_results(results_double, "double", n, pattern);
             
             // int32_t
-            auto results_i32 = run_benchmark<int32_t>(n, pattern);
+            auto results_i32 = run_benchmark<int32_t>(n, pattern, warmup, bench);
             print_results(results_i32, "int32_t", n, pattern);
             
             // int64_t
-            auto results_i64 = run_benchmark<int64_t>(n, pattern);
+            auto results_i64 = run_benchmark<int64_t>(n, pattern, warmup, bench);
             print_results(results_i64, "int64_t", n, pattern);
         }
         
