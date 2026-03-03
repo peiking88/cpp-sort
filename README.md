@@ -73,45 +73,68 @@ falls back to `std::sort`, ensuring correctness and portability.
 
 ## Parallel Sorting
 
-cpp-sort includes **`parallel_sorter`**, a parallel merge sort implementation 
-powered by [libfork](https://github.com/ConorWilliams/libfork) for large datasets. 
-It automatically enables parallel sorting for datasets with **1 million or more elements**, 
-falling back to sequential `std::sort` for smaller datasets.
+cpp-sort includes **8 parallel sorters** powered by [libfork](https://github.com/ConorWilliams/libfork) 
+for large datasets. They automatically enable parallel sorting for datasets with **1 million or more 
+elements**, falling back to sequential sorting for smaller datasets.
 
 ```cpp
 #include <vector>
 #include <cpp-sort/sorters/parallel_sorter.h>
+#include <cpp-sort/sorters/parallel_pdq_sorter.h>
+#include <cpp-sort/sorters/parallel_simd_sorter.h>
 
 int main()
 {
-    // Large dataset (>= 1M elements) - uses parallel merge sort
+    // Large dataset (>= 1M elements) - uses parallel sorting
     std::vector<int> large_data(2'000'000);
-    cppsort::parallel_sort(large_data);
-    
-    // Small dataset (< 1M elements) - uses sequential std::sort
-    std::vector<int> small_data(1000);
-    cppsort::parallel_sort(small_data);
+    cppsort::parallel_sort(large_data);        // General parallel sort
+    cppsort::parallel_pdq_sort(large_data);    // Fastest for general data
+    cppsort::parallel_simd_sort(large_data);   // Fastest for SIMD-compatible types
     
     return 0;
 }
 ```
 
+### Available Parallel Sorters
+
+| Sorter | Stability | Description |
+|--------|-----------|-------------|
+| `parallel_sorter` | ❌ | General-purpose parallel sort (wraps `std::sort`) |
+| `parallel_merge_sorter` | ✅ | Stable parallel merge sort |
+| `parallel_quick_sorter` | ❌ | Parallel quicksort with median-of-three pivot |
+| `parallel_pdq_sorter` | ❌ | Parallel pattern-defeating quicksort (fastest general) |
+| `parallel_simd_sorter` | ❌ | SIMD + parallel (fastest for primitives) |
+| `parallel_tim_sorter` | ✅ | Adaptive stable sort (excellent for sorted data) |
+| `parallel_heap_sorter` | ❌ | Parallel heapsort (consistent O(n log n)) |
+| `parallel_grail_sorter` | ✅ | Stable in-place sort (memory-efficient) |
+
 ### Features
 - **Automatic threshold**: Parallel sorting activates for >= 1,000,000 elements
 - **NUMA-aware**: Uses libfork's work-stealing scheduler optimized for NUMA systems
 - **Low overhead**: Leverages C++20 coroutines for efficient task management
-- **Fallback support**: Gracefully falls back to `std::sort` when:
+- **Fallback support**: Gracefully falls back to sequential sorting when:
   - Dataset size is below threshold
   - C++20 coroutine support is unavailable
 
-### Performance
-Expected speedup on multi-core systems for large datasets:
+### Performance (100K random integers, 32 cores)
 
-| CPU Cores | Expected Speedup |
-|-----------|-----------------|
-| 8 cores   | 4-6x            |
-| 16 cores  | 8-12x           |
-| 32+ cores | 15-25x          |
+| Algorithm | Time (μs) | Speedup vs std::sort |
+|-----------|-----------|---------------------|
+| `parallel_simd_sorter` | 127 | **27.7x** |
+| `parallel_pdq_sorter` | 1,379 | 2.6x |
+| `parallel_grail_sorter` | 4,792 | 0.7x |
+| `parallel_merge_sorter` | 4,137 | 0.9x |
+| `parallel_tim_sorter` | 4,805 | 0.7x |
+| `parallel_heap_sorter` | 5,367 | 0.7x |
+
+### Performance on Sorted Data (100K integers, 32 cores)
+
+| Algorithm | Time (μs) | Speedup vs std::sort |
+|-----------|-----------|---------------------|
+| `parallel_tim_sorter` | 22 | **22.8x** |
+| `parallel_pdq_sorter` | 40 | 12.5x |
+| `parallel_grail_sorter` | 366 | 1.4x |
+| `std::sort` | 502 | 1.0x |
 
 _Note: older versions of the library targeting C++14 are still available in the `1.x.y-develop`
 and `1.x.y-stable`, but they are not actively developed anymore. Open an issue if you need
@@ -318,8 +341,10 @@ one provided by M. D. McIlroy in [*A Killer Adversary for Quicksort*](https://ww
 [x86-simd-sort](https://github.com/intel/x86-simd-sort) library, which provides 
 AVX2 and AVX-512 accelerated sorting for primitive types.
 
-* The parallel sorting implementation in `parallel_sorter` uses [libfork](https://github.com/ConorWilliams/libfork),
-a lock-free, wait-free, continuation-stealing coroutine tasking library built on C++20 coroutines.
+* The parallel sorting implementations (`parallel_sorter`, `parallel_merge_sorter`, `parallel_quick_sorter`, 
+`parallel_pdq_sorter`, `parallel_simd_sorter`, `parallel_tim_sorter`, `parallel_heap_sorter`, `parallel_grail_sorter`) 
+use [libfork](https://github.com/ConorWilliams/libfork), a lock-free, wait-free, continuation-stealing 
+coroutine tasking library built on C++20 coroutines.
 
 * The test suite reimplements random number algorithms originally found in the following places:
   - [xoshiro256\*\*](https://prng.di.unimi.it/)
