@@ -150,6 +150,19 @@ run_benchmarks() {
     print_success "Performance benchmarks complete"
 }
 
+# Run parallel_sorter tests
+run_parallel_tests() {
+    print_separator
+    print_info "Running parallel_sorter tests..."
+    
+    cd "${PROJECT_ROOT}/build"
+    
+    # Run parallel_sorter specific tests
+    ctest -R parallel_sorter --output-on-failure -j$(nproc)
+    
+    print_success "parallel_sorter tests complete"
+}
+
 # Run simd_sorter tests
 run_simd_tests() {
     print_separator
@@ -172,17 +185,19 @@ show_help() {
     echo "  -d, --deps       Download dependencies only"
     echo "  -b, --build      Build project only"
     echo "  -t, --test       Run unit tests only"
-    echo "  -p, --perf       Run performance benchmarks only"
+    echo "  -B, --bench      Run performance benchmarks only"
+    echo "  -p, --parallel   Run parallel_sorter tests only"
     echo "  -s, --simd       Run simd_sorter tests only"
     echo "  --no-deps        Skip dependency download"
     echo "  --no-test        Skip unit tests"
-    echo "  --no-perf        Skip performance benchmarks"
+    echo "  --no-bench       Skip performance benchmarks"
     echo "  --all            Execute all steps (default)"
     echo ""
     echo "Examples:"
     echo "  $0               # Execute all steps"
     echo "  $0 --no-deps     # Skip dependency download"
     echo "  $0 -b -t         # Build and test only"
+    echo "  $0 -p            # Run parallel_sorter tests only"
     echo "  $0 -s            # Run simd_sorter tests only"
 }
 
@@ -192,6 +207,7 @@ main() {
     local run_build=true
     local run_test=true
     local run_perf=true
+    local run_parallel=true
     local run_simd=true
     
     # Parse arguments
@@ -206,6 +222,7 @@ main() {
                 run_build=false
                 run_test=false
                 run_perf=false
+                run_parallel=false
                 run_simd=false
                 shift
                 ;;
@@ -214,6 +231,7 @@ main() {
                 run_build=true
                 run_test=false
                 run_perf=false
+                run_parallel=false
                 run_simd=false
                 shift
                 ;;
@@ -222,14 +240,25 @@ main() {
                 run_build=false
                 run_test=true
                 run_perf=false
+                run_parallel=false
                 run_simd=false
                 shift
                 ;;
-            -p|--perf)
+            -B|--bench)
                 run_deps=false
                 run_build=false
                 run_test=false
                 run_perf=true
+                run_parallel=false
+                run_simd=false
+                shift
+                ;;
+            -p|--parallel)
+                run_deps=false
+                run_build=false
+                run_test=false
+                run_perf=false
+                run_parallel=true
                 run_simd=false
                 shift
                 ;;
@@ -238,6 +267,7 @@ main() {
                 run_build=false
                 run_test=false
                 run_perf=false
+                run_parallel=false
                 run_simd=true
                 shift
                 ;;
@@ -249,8 +279,12 @@ main() {
                 run_test=false
                 shift
                 ;;
-            --no-perf)
+            --no-bench)
                 run_perf=false
+                shift
+                ;;
+            --no-parallel)
+                run_parallel=false
                 shift
                 ;;
             --no-simd)
@@ -262,6 +296,7 @@ main() {
                 run_build=true
                 run_test=true
                 run_perf=true
+                run_parallel=true
                 run_simd=true
                 shift
                 ;;
@@ -299,6 +334,10 @@ main() {
     
     if $run_test; then
         run_unit_tests
+    fi
+    
+    if $run_parallel; then
+        run_parallel_tests
     fi
     
     if $run_perf || $run_simd; then
