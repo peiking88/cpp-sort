@@ -168,6 +168,32 @@ run_parallel_tests() {
     print_success "Parallel sorters tests complete"
 }
 
+# Run serial vs parallel comparison tests
+# Usage: run_compare_tests [algorithm]
+# algorithm: all, merge, quick, pdq, tim, heap, grail, simd (default: all)
+run_compare_tests() {
+    local algo="${1:-all}"
+    
+    print_separator
+    print_info "Running serial vs parallel comparison tests (algorithm: ${algo})..."
+    
+    # Build benchmark first
+    cd "${PROJECT_ROOT}/benchmarks/sort-comparison"
+    mkdir -p build
+    cd build
+    cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
+    make -j$(nproc) -s bench-serial-parallel 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
+    
+    # Run serial vs parallel comparison benchmark
+    if [ "$algo" = "all" ]; then
+        ./bench-serial-parallel
+    else
+        ./bench-serial-parallel -c "$algo"
+    fi
+    
+    print_success "Serial vs parallel comparison tests complete"
+}
+
 # Run simd_sorter tests
 run_simd_tests() {
     print_separator
@@ -193,6 +219,9 @@ show_help() {
     echo "  -B, --bench      Run performance benchmarks only"
     echo "  -p, --parallel   Run parallel sorters tests (parallel_sorter, parallel_merge_sorter, parallel_quick_sorter, parallel_pdq_sorter)"
     echo "  -s, --simd       Run simd_sorter tests only"
+    echo "  -c <algo>        Run serial vs parallel comparison tests for specific algorithm"
+    echo "                   Algorithms: all, merge, quick, pdq, tim, heap, grail, simd"
+    echo "                   Default: all (compare all algorithm pairs)"
     echo "  --no-deps        Skip dependency download"
     echo "  --no-test        Skip unit tests"
     echo "  --no-bench       Skip performance benchmarks"
@@ -204,6 +233,8 @@ show_help() {
     echo "  $0 -b -t         # Build and test only"
     echo "  $0 -p            # Run parallel_sorter tests only"
     echo "  $0 -s            # Run simd_sorter tests only"
+    echo "  $0 -c merge      # Compare merge_sorter vs parallel_merge_sorter"
+    echo "  $0 -c all        # Compare all serial vs parallel algorithm pairs"
 }
 
 # Main function
@@ -214,6 +245,8 @@ main() {
     local run_perf=true
     local run_parallel=true
     local run_simd=true
+    local run_compare=false
+    local compare_algo="all"
     
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -229,6 +262,7 @@ main() {
                 run_perf=false
                 run_parallel=false
                 run_simd=false
+                run_compare=false
                 shift
                 ;;
             -b|--build)
@@ -238,6 +272,7 @@ main() {
                 run_perf=false
                 run_parallel=false
                 run_simd=false
+                run_compare=false
                 shift
                 ;;
             -t|--test)
@@ -247,6 +282,7 @@ main() {
                 run_perf=false
                 run_parallel=false
                 run_simd=false
+                run_compare=false
                 shift
                 ;;
             -B|--bench)
@@ -256,6 +292,7 @@ main() {
                 run_perf=true
                 run_parallel=false
                 run_simd=false
+                run_compare=false
                 shift
                 ;;
             -p|--parallel)
@@ -265,6 +302,7 @@ main() {
                 run_perf=false
                 run_parallel=true
                 run_simd=false
+                run_compare=false
                 shift
                 ;;
             -s|--simd)
@@ -274,6 +312,21 @@ main() {
                 run_perf=false
                 run_parallel=false
                 run_simd=true
+                run_compare=false
+                shift
+                ;;
+            -c)
+                run_deps=false
+                run_build=false
+                run_test=false
+                run_perf=false
+                run_parallel=false
+                run_simd=false
+                run_compare=true
+                if [[ $# -gt 1 && ! "$2" =~ ^- ]]; then
+                    compare_algo="$2"
+                    shift
+                fi
                 shift
                 ;;
             --no-deps)
@@ -303,6 +356,7 @@ main() {
                 run_perf=true
                 run_parallel=true
                 run_simd=true
+                run_compare=false
                 shift
                 ;;
             *)
@@ -343,6 +397,10 @@ main() {
     
     if $run_parallel; then
         run_parallel_tests
+    fi
+    
+    if $run_compare; then
+        run_compare_tests "$compare_algo"
     fi
     
     if $run_perf || $run_simd; then

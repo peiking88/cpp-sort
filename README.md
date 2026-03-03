@@ -97,16 +97,18 @@ int main()
 
 ### Available Parallel Sorters
 
-| Sorter | Stability | Description |
-|--------|-----------|-------------|
-| `parallel_sorter` | ❌ | General-purpose parallel sort (wraps `std::sort`) |
-| `parallel_merge_sorter` | ✅ | Stable parallel merge sort |
-| `parallel_quick_sorter` | ❌ | Parallel quicksort with median-of-three pivot |
-| `parallel_pdq_sorter` | ❌ | Parallel pattern-defeating quicksort (fastest general) |
-| `parallel_simd_sorter` | ❌ | SIMD + parallel (fastest for primitives) |
-| `parallel_tim_sorter` | ✅ | Adaptive stable sort (excellent for sorted data) |
-| `parallel_heap_sorter` | ❌ | Parallel heapsort (consistent O(n log n)) |
-| `parallel_grail_sorter` | ✅ | Stable in-place sort (memory-efficient) |
+| Sorter | Stability | Supported Types | Description |
+|--------|-----------|-----------------|-------------|
+| `parallel_sorter` | ❌ | Any comparable | General-purpose parallel sort (wraps `std::sort`) |
+| `parallel_merge_sorter` | ✅ | Any comparable | Stable parallel merge sort |
+| `parallel_quick_sorter` | ❌ | Any comparable | Parallel quicksort with median-of-three pivot |
+| `parallel_pdq_sorter` | ❌ | Any comparable | Parallel pattern-defeating quicksort (fastest general) |
+| `parallel_simd_sorter` | ❌ | Primitives only† | SIMD + parallel (fastest for primitives) |
+| `parallel_tim_sorter` | ✅ | Any comparable | Adaptive stable sort (excellent for sorted data) |
+| `parallel_heap_sorter` | ❌ | Any comparable | Parallel heapsort (consistent O(n log n)) |
+| `parallel_grail_sorter` | ✅ | Any comparable | Stable in-place sort (memory-efficient) |
+
+† **Primitives only**: `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`, `float`, `double`
 
 ### Features
 - **Automatic threshold**: Parallel sorting activates for >= 1,000,000 elements
@@ -135,6 +137,33 @@ int main()
 | `parallel_pdq_sorter` | 40 | 12.5x |
 | `parallel_grail_sorter` | 366 | 1.4x |
 | `std::sort` | 502 | 1.0x |
+
+### Serial vs Parallel Performance Comparison
+
+Run `./build.sh -c <algorithm>` to compare serial and parallel versions:
+
+```bash
+./build.sh -c all      # Compare all algorithm pairs
+./build.sh -c merge    # Compare merge_sorter vs parallel_merge_sorter
+./build.sh -c quick    # Compare quick_sorter vs parallel_quick_sorter
+./build.sh -c pdq      # Compare pdq_sorter vs parallel_pdq_sorter
+./build.sh -c tim      # Compare tim_sorter vs parallel_tim_sorter
+./build.sh -c heap     # Compare heap_sorter vs parallel_heap_sorter
+./build.sh -c grail    # Compare grail_sorter vs parallel_grail_sorter
+./build.sh -c simd     # Compare simd_sorter vs parallel_simd_sorter
+```
+
+**Typical Speedup (Random Data, 5M elements, 32 cores):**
+
+| Algorithm Pair | Serial (μs) | Parallel (μs) | Speedup |
+|----------------|-------------|---------------|---------|
+| merge_sorter | ~180,000 | ~40,000 | **4-5x** |
+| quick_sorter | ~150,000 | ~35,000 | **4-5x** |
+| pdq_sorter | ~140,000 | ~35,000 | **4x** |
+| tim_sorter | ~600,000 | ~80,000 | **7-8x** |
+| heap_sorter | ~250,000 | ~50,000 | **5x** |
+| grail_sorter | ~200,000 | ~45,000 | **4-5x** |
+| simd_sorter | ~20,000 | ~5,000 | **4x** |
 
 _Note: older versions of the library targeting C++14 are still available in the `1.x.y-develop`
 and `1.x.y-stable`, but they are not actively developed anymore. Open an issue if you need

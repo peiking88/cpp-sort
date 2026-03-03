@@ -87,3 +87,22 @@ target_compile_options(bench-parallel PRIVATE
 )
 
 target_link_libraries(bench-parallel PRIVATE m pthread)
+
+# Benchmark executable for serial vs parallel comparison
+add_executable(bench-serial-parallel
+    bench-serial-parallel.cpp
+)
+
+target_include_directories(bench-serial-parallel PRIVATE
+    ${CPPSORT_INCLUDE_DIR}
+    ${LIBFORK_INCLUDE_DIR}
+)
+
+target_compile_options(bench-serial-parallel PRIVATE
+    -O3
+    -march=native
+    -Wall
+    -Wextra
+)
+
+target_link_libraries(bench-serial-parallel PRIVATE m pthread)
