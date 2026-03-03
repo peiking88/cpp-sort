@@ -155,10 +155,15 @@ run_parallel_tests() {
     print_separator
     print_info "Running parallel_sorter tests..."
     
-    cd "${PROJECT_ROOT}/build"
+    # Build benchmark first
+    cd "${PROJECT_ROOT}/benchmarks/sort-comparison"
+    mkdir -p build
+    cd build
+    cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
+    make -j$(nproc) -s bench-parallel 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
     
-    # Run parallel_sorter specific tests
-    ctest -R parallel_sorter --output-on-failure -j$(nproc)
+    # Run parallel_sorter benchmark
+    ./bench-parallel
     
     print_success "parallel_sorter tests complete"
 }

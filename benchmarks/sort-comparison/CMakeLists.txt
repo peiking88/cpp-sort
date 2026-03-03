@@ -68,3 +68,22 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(test-simd-sorter PRIVATE OpenMP::OpenMP_CXX)
     target_compile_definitions(test-simd-sorter PRIVATE XSS_USE_OPENMP)
 endif()
+
+# Benchmark executable for parallel_sorter
+add_executable(bench-parallel
+    bench-parallel.cpp
+)
+
+target_include_directories(bench-parallel PRIVATE
+    ${CPPSORT_INCLUDE_DIR}
+    ${LIBFORK_INCLUDE_DIR}
+)
+
+target_compile_options(bench-parallel PRIVATE
+    -O3
+    -march=native
+    -Wall
+    -Wextra
+)
+
+target_link_libraries(bench-parallel PRIVATE m pthread)
