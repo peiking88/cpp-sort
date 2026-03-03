@@ -21,6 +21,7 @@
 #include <cpp-sort/sorters/parallel_quick_sorter.h>
 #include <cpp-sort/sorters/parallel_pdq_sorter.h>
 #include <cpp-sort/sorters/parallel_simd_sorter.h>
+#include <cpp-sort/sorters/parallel_tim_sorter.h>
 
 ////////////////////////////////////////////////////////////
 // Test configuration
@@ -152,6 +153,12 @@ void parallel_simd_sort_func(T* arr, std::size_t n) {
     sorter(arr, arr + n);
 }
 
+template<typename T>
+void parallel_tim_sort_func(T* arr, std::size_t n) {
+    cppsort::parallel_tim_sorter sorter;
+    sorter(arr, arr + n);
+}
+
 ////////////////////////////////////////////////////////////
 // Correctness verification
 ////////////////////////////////////////////////////////////
@@ -206,6 +213,7 @@ auto run_benchmark(std::size_t n, DataPattern pattern,
         {"parallel_quick_sorter", parallel_quick_sort_func<T>},
         {"parallel_pdq_sorter", parallel_pdq_sort_func<T>},
         {"parallel_simd_sorter", parallel_simd_sort_func<T>},
+        {"parallel_tim_sorter", parallel_tim_sort_func<T>},
     };
     
     for (const auto& algo : algorithms) {
