@@ -247,6 +247,10 @@ add_executable(main-tests
     sorters/merge_insertion_sorter_projection.cpp
     sorters/merge_sorter.cpp
     sorters/merge_sorter_projection.cpp
+    sorters/parallel_grail_sorter.cpp
+    sorters/parallel_grail_sorter_projection.cpp
+    sorters/parallel_heap_sorter.cpp
+    sorters/parallel_heap_sorter_projection.cpp
     sorters/parallel_merge_sorter.cpp
     sorters/parallel_merge_sorter_projection.cpp
     sorters/parallel_pdq_sorter.cpp
