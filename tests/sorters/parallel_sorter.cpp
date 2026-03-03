@@ -64,7 +64,7 @@ TEST_CASE( "parallel_sorter tests", "[parallel_sorter]" )
         std::vector<int> vec;
         vec.reserve(100);
         auto distribution = dist::ascending{};
-        distribution(std::back_inserter(vec), 100, 0);
+        distribution(std::back_inserter(vec), 100);
 
         cppsort::parallel_sort(vec);
         CHECK( std::is_sorted(vec.begin(), vec.end()) );
@@ -75,7 +75,7 @@ TEST_CASE( "parallel_sorter tests", "[parallel_sorter]" )
         std::vector<int> vec;
         vec.reserve(100);
         auto distribution = dist::descending{};
-        distribution(std::back_inserter(vec), 100, 0);
+        distribution(std::back_inserter(vec), 100);
 
         cppsort::parallel_sort(vec);
         CHECK( std::is_sorted(vec.begin(), vec.end()) );
@@ -86,7 +86,7 @@ TEST_CASE( "parallel_sorter tests", "[parallel_sorter]" )
         std::vector<int> vec;
         vec.reserve(100);
         auto distribution = dist::all_equal{};
-        distribution(std::back_inserter(vec), 100, 0);
+        distribution(std::back_inserter(vec), 100);
 
         cppsort::parallel_sort(vec);
         CHECK( std::is_sorted(vec.begin(), vec.end()) );
