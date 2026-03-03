@@ -150,10 +150,10 @@ run_benchmarks() {
     print_success "Performance benchmarks complete"
 }
 
-# Run parallel_sorter tests
+# Run parallel sorters tests (parallel_sorter, parallel_merge_sorter, parallel_quick_sorter, parallel_pdq_sorter)
 run_parallel_tests() {
     print_separator
-    print_info "Running parallel_sorter tests..."
+    print_info "Running parallel sorters tests..."
     
     # Build benchmark first
     cd "${PROJECT_ROOT}/benchmarks/sort-comparison"
@@ -162,10 +162,10 @@ run_parallel_tests() {
     cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
     make -j$(nproc) -s bench-parallel 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
     
-    # Run parallel_sorter benchmark
+    # Run parallel sorters benchmark
     ./bench-parallel
     
-    print_success "parallel_sorter tests complete"
+    print_success "Parallel sorters tests complete"
 }
 
 # Run simd_sorter tests
@@ -191,7 +191,7 @@ show_help() {
     echo "  -b, --build      Build project only"
     echo "  -t, --test       Run unit tests only"
     echo "  -B, --bench      Run performance benchmarks only"
-    echo "  -p, --parallel   Run parallel_sorter tests only"
+    echo "  -p, --parallel   Run parallel sorters tests (parallel_sorter, parallel_merge_sorter, parallel_quick_sorter, parallel_pdq_sorter)"
     echo "  -s, --simd       Run simd_sorter tests only"
     echo "  --no-deps        Skip dependency download"
     echo "  --no-test        Skip unit tests"

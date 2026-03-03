@@ -1,7 +1,7 @@
 /*
- * Benchmark: parallel_sorter vs std::sort Performance Comparison
+ * Benchmark: Parallel Sorters Performance Comparison
  * 
- * Compares parallel_sorter against std::sort for different array sizes
+ * Compares parallel sorters against std::sort for different array sizes
  * and data patterns.
  */
 
@@ -17,6 +17,9 @@
 
 // cpp-sort includes
 #include <cpp-sort/sorters/parallel_sorter.h>
+#include <cpp-sort/sorters/parallel_merge_sorter.h>
+#include <cpp-sort/sorters/parallel_quick_sorter.h>
+#include <cpp-sort/sorters/parallel_pdq_sorter.h>
 
 ////////////////////////////////////////////////////////////
 // Test configuration
@@ -114,8 +117,31 @@ void std_sort_func(T* arr, std::size_t n) {
 }
 
 template<typename T>
+void std_stable_sort_func(T* arr, std::size_t n) {
+    std::stable_sort(arr, arr + n);
+}
+
+template<typename T>
 void parallel_sort_func(T* arr, std::size_t n) {
     cppsort::parallel_sorter sorter;
+    sorter(arr, arr + n);
+}
+
+template<typename T>
+void parallel_merge_sort_func(T* arr, std::size_t n) {
+    cppsort::parallel_merge_sorter sorter;
+    sorter(arr, arr + n);
+}
+
+template<typename T>
+void parallel_quick_sort_func(T* arr, std::size_t n) {
+    cppsort::parallel_quick_sorter sorter;
+    sorter(arr, arr + n);
+}
+
+template<typename T>
+void parallel_pdq_sort_func(T* arr, std::size_t n) {
+    cppsort::parallel_pdq_sorter sorter;
     sorter(arr, arr + n);
 }
 
@@ -167,7 +193,11 @@ auto run_benchmark(std::size_t n, DataPattern pattern,
     
     std::vector<Algorithm> algorithms = {
         {"std::sort", std_sort_func<T>},
-        {"cpp-sort/parallel_sorter", parallel_sort_func<T>},
+        {"std::stable_sort", std_stable_sort_func<T>},
+        {"parallel_sorter", parallel_sort_func<T>},
+        {"parallel_merge_sorter", parallel_merge_sort_func<T>},
+        {"parallel_quick_sorter", parallel_quick_sort_func<T>},
+        {"parallel_pdq_sorter", parallel_pdq_sort_func<T>},
     };
     
     for (const auto& algo : algorithms) {
@@ -280,14 +310,14 @@ void print_results(const std::vector<BenchmarkResult>& results,
 int main()
 {
     std::cout << "==============================================\n";
-    std::cout << "parallel_sorter vs std::sort Performance Benchmark\n";
+    std::cout << "Parallel Sorters Performance Benchmark\n";
     std::cout << "==============================================\n";
     
     std::cout << "Hardware concurrency: " << std::thread::hardware_concurrency() << " threads\n";
     std::cout << "Warmup iterations: " << WARMUP_ITERATIONS << "\n";
     std::cout << "Benchmark iterations: " << BENCHMARK_ITERATIONS << "\n";
     
-    // Test sizes (>= 100K for parallel_sorter, max 10M)
+    // Test sizes (>= 100K for parallel sorters, max 10M)
     std::vector<std::size_t> sizes = {100000, 500000, 1000000, 5000000, 10000000};
     
     // Test patterns
