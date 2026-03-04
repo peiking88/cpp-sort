@@ -28,6 +28,33 @@ print_separator() {
     echo "============================================================"
 }
 
+# Compile with single-line progress display
+# Shows current file being compiled, updates on same line
+compile_progress() {
+    local prefix="$1"
+
+    # Use stdbuf + awk for real-time single-line update
+    stdbuf -oL -eL awk -v prefix="$prefix" -v BLUE='\033[0;34m' -v NC='\033[0m' '
+    BEGIN { count = 0 }
+    /Building C[XX]+ object/ {
+        count++
+        # Extract filename after "object"
+        match($0, /object [^ ]+/)
+        file = substr($0, RSTART+7, RLENGTH-7)
+        # Clear line and print progress
+        printf "\r\033[K%s[INFO]%s %s [%d] %s", BLUE, NC, prefix, count, file
+        fflush(stdout)
+    }
+    /Linking/ {
+        printf "\r\033[K%s[INFO]%s %s linking...", BLUE, NC, prefix
+        fflush(stdout)
+    }
+    END {
+        printf "\r\033[K%s[INFO]%s %s compiled %d files.\n", BLUE, NC, prefix, count
+    }
+    '
+}
+
 # Check if command exists
 check_command() {
     if ! command -v "$1" &> /dev/null; then
@@ -86,9 +113,9 @@ build_project() {
     print_info "CMake configuration..."
     cmake .. -Wno-dev -DCPPSORT_BUILD_TESTING=ON -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" 2>/dev/null
     
-    # Compile
+    # Compile with progress display
     print_info "Compiling..."
-    make -j$(nproc) -s 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
+    make -j$(nproc) 2>&1 | compile_progress "Building"
     
     print_success "Main project build complete"
 }
@@ -131,8 +158,8 @@ build_benchmarks() {
     # CMake configure
     cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" 2>/dev/null
     
-    # Compile
-    make -j$(nproc) -s 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
+    # Compile with progress display
+    make -j$(nproc) 2>&1 | compile_progress "Building benchmarks"
     
     print_success "Performance benchmarks build complete"
 }
@@ -160,7 +187,7 @@ run_parallel_tests() {
     mkdir -p build
     cd build
     cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
-    make -j$(nproc) -s bench-parallel 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
+    make -j$(nproc) 2>&1 | compile_progress "Building parallel benchmarks"
     
     # Run parallel sorters benchmark
     ./bench-parallel
@@ -182,7 +209,7 @@ run_compare_tests() {
     mkdir -p build
     cd build
     cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
-    make -j$(nproc) -s bench-serial-parallel 2>&1 | grep -v "^$" | grep -v "warning:" | grep -v "note:" || true
+    make -j$(nproc) 2>&1 | compile_progress "Building comparison benchmarks"
     
     # Run serial vs parallel comparison benchmark
     if [ "$algo" = "all" ]; then
