@@ -284,7 +284,6 @@ main() {
     $run_simd && run_simd_tests
     $run_bench && run_benchmarks
     
-    echo ""
     log_ok "All tasks completed!"
 }
 
