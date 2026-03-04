@@ -34,28 +34,46 @@ count_targets() {
 
 # ============================================================================
 # Compile with single-line progress display
-# Shows [current/total] format
+# Shows [current/total] format, single-line update in terminal
 # ============================================================================
 compile_progress() {
     local prefix="$1"
     local total="$2"
-    stdbuf -oL -eL awk -v prefix="$prefix" -v total="$total" -v BLUE='\033[0;34m' -v NC='\033[0m' '
-    BEGIN { count = 0 }
-    /Building C[XX]+ object/ {
-        count++
-        match($0, /object [^ ]+/)
-        file = substr($0, RSTART+7, RLENGTH-7)
-        printf "\r\033[K%s[INFO]%s %s [%d/%d] %s", BLUE, NC, prefix, count, total, file
-        fflush(stdout)
-    }
-    /Linking/ {
-        printf "\r\033[K%s[INFO]%s %s [%d/%d] linking...", BLUE, NC, prefix, count, total
-        fflush(stdout)
-    }
-    END {
-        printf "\r\033[K%s[INFO]%s %s [%d/%d] done.\n", BLUE, NC, prefix, count, (total > count ? total : count)
-    }
-    '
+    
+    # Check if stdout is a terminal for single-line display
+    if [ -t 1 ]; then
+        stdbuf -oL -eL awk -v prefix="$prefix" -v total="$total" -v BLUE='\033[0;34m' -v NC='\033[0m' '
+        BEGIN { count = 0 }
+        /Building C[XX]+ object/ {
+            count++
+            match($0, /object [^ ]+/)
+            file = substr($0, RSTART+7, RLENGTH-7)
+            printf "\r\033[K%s[INFO]%s %s [%d/%d] %s", BLUE, NC, prefix, count, total, file
+            fflush(stdout)
+        }
+        /Linking/ {
+            printf "\r\033[K%s[INFO]%s %s [%d/%d] linking...", BLUE, NC, prefix, count, total
+            fflush(stdout)
+        }
+        END {
+            printf "\r\033[K%s[INFO]%s %s [%d/%d] done.\n", BLUE, NC, prefix, count, (total > count ? total : count)
+        }
+        '
+    else
+        # Non-terminal: simple progress output
+        awk -v prefix="$prefix" -v total="$total" '
+        BEGIN { count = 0 }
+        /Building C[XX]+ object/ {
+            count++
+            match($0, /object [^ ]+/)
+            file = substr($0, RSTART+7, RLENGTH-7)
+            printf "[INFO] %s [%d/%d] %s\n", prefix, count, total, file
+        }
+        END {
+            printf "[INFO] %s [%d/%d] done.\n", prefix, count, (total > count ? total : count)
+        }
+        '
+    fi
 }
 
 # ============================================================================
