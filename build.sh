@@ -271,15 +271,8 @@ main() {
     command -v git >/dev/null || { log_error "git not installed"; exit 1; }
     command -v cmake >/dev/null || { log_error "cmake not installed"; exit 1; }
     
-    # Banner
-    echo -e "${GREEN}"
-    echo "   ____      __           __  ____                  __"
-    echo "  / ____/___/ /___ ____  / /_/ __ \\____  ____  ____/ /"
-    echo " / /   / __  / __ \`/ _ \\/ __/ /_/ / __ \\/ __ \\/ __  / "
-    echo "/ /___/ /_/ / /_/ /  __/ /_/ ____/ /_/ / / / / /_/ /  "
-    echo "\\____/\\__,_/\\__, /\\___/\\__/_/    \\__,_/_/ /_/\\__,_/   "
-    echo "            /____/                                     ${NC}"
-    echo ""
+    # Start
+    log_info "Starting cpp-sort build..."
     
     # Execute steps
     $run_deps && download_dependencies
