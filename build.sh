@@ -4,44 +4,37 @@
 # Features: dependency download, build, unit tests, performance benchmarks
 #
 
-set -e  # Exit on error
+set -e
 
-# Color definitions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Project root directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="${SCRIPT_DIR}"
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_ok() { echo -e "${GREEN}[OK]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Print colored messages
-print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
-print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
-print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+# Get number of parallel jobs
+get_nproc() { nproc 2>/dev/null || echo 4; }
 
-# Print separator
-print_separator() {
-    echo "============================================================"
-}
-
+# ============================================================================
 # Compile with single-line progress display
-# Shows current file being compiled, updates on same line
+# ============================================================================
 compile_progress() {
     local prefix="$1"
-
-    # Use stdbuf + awk for real-time single-line update
     stdbuf -oL -eL awk -v prefix="$prefix" -v BLUE='\033[0;34m' -v NC='\033[0m' '
     BEGIN { count = 0 }
     /Building C[XX]+ object/ {
         count++
-        # Extract filename after "object"
         match($0, /object [^ ]+/)
         file = substr($0, RSTART+7, RLENGTH-7)
-        # Clear line and print progress
         printf "\r\033[K%s[INFO]%s %s [%d] %s", BLUE, NC, prefix, count, file
         fflush(stdout)
     }
@@ -55,221 +48,197 @@ compile_progress() {
     '
 }
 
-# Check if command exists
-check_command() {
-    if ! command -v "$1" &> /dev/null; then
-        print_error "$1 not installed, please install $1 first"
-        exit 1
-    fi
-}
-
-# Download test dependencies (Catch2, RapidCheck)
+# ============================================================================
+# Step 1: Download test dependencies (Catch2, RapidCheck)
+# ============================================================================
 download_dependencies() {
-    print_separator
-    print_info "Checking test dependencies..."
+    log_info "Checking test dependencies..."
     
-    cd "${PROJECT_ROOT}"
+    mkdir -p external
     
-    # Create external directory
-    if [ ! -d "external" ]; then
-        mkdir -p external
-    fi
-    
-    # Download Catch2 (for unit tests)
-    if [ ! -d "external/catch2" ] || [ ! -f "external/catch2/CMakeLists.txt" ]; then
-        print_info "Downloading Catch2..."
+    # Download Catch2
+    if [ ! -f "external/catch2/CMakeLists.txt" ]; then
+        log_info "Downloading Catch2..."
         rm -rf external/catch2
         git clone --depth 1 --branch v3.7.0 https://bgithub.xyz/catchorg/Catch2.git external/catch2
-        print_success "Catch2 downloaded"
+        log_ok "Catch2 downloaded"
     else
-        print_info "Catch2 already exists, skipping"
+        log_info "Catch2 already exists"
     fi
     
-    # Download RapidCheck (for property-based tests)
-    if [ ! -d "external/rapidcheck" ] || [ ! -f "external/rapidcheck/CMakeLists.txt" ]; then
-        print_info "Downloading RapidCheck..."
+    # Download RapidCheck
+    if [ ! -f "external/rapidcheck/CMakeLists.txt" ]; then
+        log_info "Downloading RapidCheck..."
         rm -rf external/rapidcheck
         git clone --depth 1 https://bgithub.xyz/emil-e/rapidcheck.git external/rapidcheck
-        print_success "RapidCheck downloaded"
+        log_ok "RapidCheck downloaded"
     else
-        print_info "RapidCheck already exists, skipping"
+        log_info "RapidCheck already exists"
     fi
     
-    print_success "Dependencies check complete"
+    log_ok "Dependencies ready"
 }
 
-# Build main project
+# ============================================================================
+# Step 2: Build main project
+# ============================================================================
 build_project() {
-    print_separator
-    print_info "Building main project..."
+    local build_dir="$SCRIPT_DIR/build"
+    local nproc=$(get_nproc)
     
-    cd "${PROJECT_ROOT}"
-    
-    # Create and enter build directory
-    mkdir -p build
-    cd build
+    log_info "Building main project..."
     
     # CMake configure
-    print_info "CMake configuration..."
-    cmake .. -Wno-dev -DCPPSORT_BUILD_TESTING=ON -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" 2>/dev/null
+    cmake -S "$SCRIPT_DIR" -B "$build_dir" \
+        -DCPPSORT_BUILD_TESTING=ON \
+        -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" \
+        -Wno-dev 2>/dev/null
     
-    # Compile with progress display
-    print_info "Compiling..."
-    make -j$(nproc) 2>&1 | compile_progress "Building"
+    # Build with progress
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building"
     
-    print_success "Main project build complete"
+    log_ok "Main project built"
 }
 
-# Run unit tests
+# ============================================================================
+# Step 3: Run unit tests
+# ============================================================================
 run_unit_tests() {
-    print_separator
-    print_info "Running unit tests..."
+    local build_dir="$SCRIPT_DIR/build"
     
-    cd "${PROJECT_ROOT}/build"
+    log_info "Running unit tests..."
     
-    # Run tests
-    local test_output=$(ctest --output-on-failure -j$(nproc) 2>&1)
-    local test_result=$?
-    
-    echo "$test_output"
-    
-    if [ $test_result -eq 0 ]; then
-        # Extract test statistics
-        local passed=$(echo "$test_output" | grep -oP '\d+(?= tests passed)' | tail -1)
-        local total=$(echo "$test_output" | grep -oP '\d+(?= tests? passed)' | tail -1)
-        print_success "Unit tests passed: ${passed}/${total} tests"
-    else
-        print_error "Unit tests failed"
+    local output
+    output=$(cd "$build_dir" && ctest --output-on-failure -j$(get_nproc) 2>&1) || {
+        echo "$output"
+        log_error "Unit tests failed"
         exit 1
-    fi
+    }
+    
+    echo "$output"
+    
+    # Extract stats
+    local passed=$(echo "$output" | grep -oP '\d+(?= tests passed)' | tail -1)
+    local total=$(echo "$output" | grep -oP '\d+(?= tests? passed)' | tail -1)
+    log_ok "Unit tests passed: ${passed}/${total} tests"
 }
 
-# Build performance benchmarks
+# ============================================================================
+# Step 4: Build performance benchmarks
+# ============================================================================
 build_benchmarks() {
-    print_separator
-    print_info "Building performance benchmarks..."
+    local build_dir="$SCRIPT_DIR/benchmarks/sort-comparison/build"
+    local nproc=$(get_nproc)
     
-    cd "${PROJECT_ROOT}/benchmarks/sort-comparison"
+    log_info "Building benchmarks..."
     
-    # Create and enter build directory
-    mkdir -p build
-    cd build
+    cmake -S "$SCRIPT_DIR/benchmarks/sort-comparison" -B "$build_dir" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" \
+        -Wno-dev 2>/dev/null
     
-    # CMake configure
-    cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" 2>/dev/null
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building benchmarks"
     
-    # Compile with progress display
-    make -j$(nproc) 2>&1 | compile_progress "Building benchmarks"
-    
-    print_success "Performance benchmarks build complete"
+    log_ok "Benchmarks built"
 }
 
-# Run performance benchmarks
+# ============================================================================
+# Step 5: Run performance benchmarks
+# ============================================================================
 run_benchmarks() {
-    print_separator
-    print_info "Running performance benchmarks..."
-    
-    cd "${PROJECT_ROOT}/benchmarks/sort-comparison/build"
-    
-    # Run benchmark
-    ./bench-sort-comparison
-    
-    print_success "Performance benchmarks complete"
+    log_info "Running performance benchmarks..."
+    "$SCRIPT_DIR/benchmarks/sort-comparison/build/bench-sort-comparison"
+    log_ok "Benchmarks complete"
 }
 
-# Run parallel sorters tests (parallel_sorter, parallel_merge_sorter, parallel_quick_sorter, parallel_pdq_sorter)
+# ============================================================================
+# Step 6: Run parallel sorters tests
+# ============================================================================
 run_parallel_tests() {
-    print_separator
-    print_info "Running parallel sorters tests..."
+    local build_dir="$SCRIPT_DIR/benchmarks/sort-comparison/build"
+    local nproc=$(get_nproc)
     
-    # Build benchmark first
-    cd "${PROJECT_ROOT}/benchmarks/sort-comparison"
-    mkdir -p build
-    cd build
-    cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
-    make -j$(nproc) 2>&1 | compile_progress "Building parallel benchmarks"
+    log_info "Running parallel sorters tests..."
     
-    # Run parallel sorters benchmark
-    ./bench-parallel
+    # Build if needed
+    cmake -S "$SCRIPT_DIR/benchmarks/sort-comparison" -B "$build_dir" \
+        -DCMAKE_BUILD_TYPE=Release -Wno-dev 2>/dev/null
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building parallel"
     
-    print_success "Parallel sorters tests complete"
+    "$build_dir/bench-parallel"
+    log_ok "Parallel tests complete"
 }
 
-# Run serial vs parallel comparison tests
-# Usage: run_compare_tests [algorithm]
-# algorithm: all, merge, quick, pdq, tim, heap, grail, simd (default: all)
+# ============================================================================
+# Step 7: Run serial vs parallel comparison
+# ============================================================================
 run_compare_tests() {
     local algo="${1:-all}"
+    local build_dir="$SCRIPT_DIR/benchmarks/sort-comparison/build"
+    local nproc=$(get_nproc)
     
-    print_separator
-    print_info "Running serial vs parallel comparison tests (algorithm: ${algo})..."
+    log_info "Running serial vs parallel comparison (${algo})..."
     
-    # Build benchmark first
-    cd "${PROJECT_ROOT}/benchmarks/sort-comparison"
-    mkdir -p build
-    cd build
-    cmake .. -Wno-dev -DCMAKE_BUILD_TYPE=Release 2>/dev/null
-    make -j$(nproc) 2>&1 | compile_progress "Building comparison benchmarks"
+    cmake -S "$SCRIPT_DIR/benchmarks/sort-comparison" -B "$build_dir" \
+        -DCMAKE_BUILD_TYPE=Release -Wno-dev 2>/dev/null
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building comparison"
     
-    # Run serial vs parallel comparison benchmark
     if [ "$algo" = "all" ]; then
-        ./bench-serial-parallel
+        "$build_dir/bench-serial-parallel"
     else
-        ./bench-serial-parallel -c "$algo"
+        "$build_dir/bench-serial-parallel" -c "$algo"
     fi
     
-    print_success "Serial vs parallel comparison tests complete"
+    log_ok "Comparison complete"
 }
 
-# Run simd_sorter tests
+# ============================================================================
+# Step 8: Run SIMD sorter tests
+# ============================================================================
 run_simd_tests() {
-    print_separator
-    print_info "Running simd_sorter tests..."
-    
-    cd "${PROJECT_ROOT}/benchmarks/sort-comparison/build"
-    
-    # Run simd_sorter tests
-    ./test-simd-sorter
-    
-    print_success "simd_sorter tests complete"
+    log_info "Running SIMD sorter tests..."
+    "$SCRIPT_DIR/benchmarks/sort-comparison/build/test-simd-sorter"
+    log_ok "SIMD tests complete"
 }
 
+# ============================================================================
 # Show help
+# ============================================================================
 show_help() {
-    echo "Usage: $0 [options]"
-    echo ""
-    echo "Options:"
-    echo "  -h, --help       Show this help message"
-    echo "  -d, --deps       Download dependencies only"
-    echo "  -b, --build      Build project only"
-    echo "  -t, --test       Run unit tests only"
-    echo "  -B, --bench      Run performance benchmarks only"
-    echo "  -p, --parallel   Run parallel sorters tests (parallel_sorter, parallel_merge_sorter, parallel_quick_sorter, parallel_pdq_sorter)"
-    echo "  -s, --simd       Run simd_sorter tests only"
-    echo "  -c <algo>        Run serial vs parallel comparison tests for specific algorithm"
-    echo "                   Algorithms: all, merge, quick, pdq, tim, heap, grail, simd"
-    echo "                   Default: all (compare all algorithm pairs)"
-    echo "  --no-deps        Skip dependency download"
-    echo "  --no-test        Skip unit tests"
-    echo "  --no-bench       Skip performance benchmarks"
-    echo "  --all            Execute all steps (default)"
-    echo ""
-    echo "Examples:"
-    echo "  $0               # Execute all steps"
-    echo "  $0 --no-deps     # Skip dependency download"
-    echo "  $0 -b -t         # Build and test only"
-    echo "  $0 -p            # Run parallel_sorter tests only"
-    echo "  $0 -s            # Run simd_sorter tests only"
-    echo "  $0 -c merge      # Compare merge_sorter vs parallel_merge_sorter"
-    echo "  $0 -c all        # Compare all serial vs parallel algorithm pairs"
+    cat << EOF
+Usage: $0 [options]
+
+Options:
+  -h, --help       Show this help message
+  -d, --deps       Download dependencies only
+  -b, --build      Build project only
+  -t, --test       Run unit tests only
+  -B, --bench      Run performance benchmarks only
+  -p, --parallel   Run parallel sorters tests
+  -s, --simd       Run SIMD sorter tests only
+  -c <algo>        Run serial vs parallel comparison
+                   Algorithms: all, merge, quick, pdq, tim, heap, grail, simd
+  --no-deps        Skip dependency download
+  --no-test        Skip unit tests
+  --no-bench       Skip performance benchmarks
+  --all            Execute all steps (default)
+
+Examples:
+  $0               # Execute all steps
+  $0 --no-deps     # Skip dependency download
+  $0 -b -t         # Build and test only
+  $0 -c merge      # Compare merge_sorter vs parallel_merge_sorter
+EOF
 }
 
-# Main function
+# ============================================================================
+# Main
+# ============================================================================
 main() {
     local run_deps=true
     local run_build=true
     local run_test=true
-    local run_perf=true
+    local run_bench=true
     local run_parallel=true
     local run_simd=true
     local run_compare=false
@@ -278,174 +247,52 @@ main() {
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -h|--help)
-                show_help
-                exit 0
-                ;;
-            -d|--deps)
-                run_deps=true
-                run_build=false
-                run_test=false
-                run_perf=false
-                run_parallel=false
-                run_simd=false
-                run_compare=false
-                shift
-                ;;
-            -b|--build)
-                run_deps=false
-                run_build=true
-                run_test=false
-                run_perf=false
-                run_parallel=false
-                run_simd=false
-                run_compare=false
-                shift
-                ;;
-            -t|--test)
-                run_deps=false
-                run_build=false
-                run_test=true
-                run_perf=false
-                run_parallel=false
-                run_simd=false
-                run_compare=false
-                shift
-                ;;
-            -B|--bench)
-                run_deps=false
-                run_build=false
-                run_test=false
-                run_perf=true
-                run_parallel=false
-                run_simd=false
-                run_compare=false
-                shift
-                ;;
-            -p|--parallel)
-                run_deps=false
-                run_build=false
-                run_test=false
-                run_perf=false
-                run_parallel=true
-                run_simd=false
-                run_compare=false
-                shift
-                ;;
-            -s|--simd)
-                run_deps=false
-                run_build=false
-                run_test=false
-                run_perf=false
-                run_parallel=false
-                run_simd=true
-                run_compare=false
-                shift
-                ;;
-            -c)
-                run_deps=false
-                run_build=false
-                run_test=false
-                run_perf=false
-                run_parallel=false
-                run_simd=false
-                run_compare=true
-                if [[ $# -gt 1 && ! "$2" =~ ^- ]]; then
-                    compare_algo="$2"
-                    shift
-                fi
-                shift
-                ;;
-            --no-deps)
-                run_deps=false
-                shift
-                ;;
-            --no-test)
-                run_test=false
-                shift
-                ;;
-            --no-bench)
-                run_perf=false
-                shift
-                ;;
-            --no-parallel)
-                run_parallel=false
-                shift
-                ;;
-            --no-simd)
-                run_simd=false
-                shift
-                ;;
-            --all)
-                run_deps=true
-                run_build=true
-                run_test=true
-                run_perf=true
-                run_parallel=true
-                run_simd=true
-                run_compare=false
-                shift
-                ;;
-            *)
-                print_error "Unknown option: $1"
-                show_help
-                exit 1
-                ;;
+            -h|--help)   show_help; exit 0 ;;
+            -d|--deps)   run_deps=true; run_build=false; run_test=false; run_bench=false; run_parallel=false; run_simd=false; run_compare=false ;;
+            -b|--build)  run_deps=false; run_build=true; run_test=false; run_bench=false; run_parallel=false; run_simd=false; run_compare=false ;;
+            -t|--test)   run_deps=false; run_build=false; run_test=true; run_bench=false; run_parallel=false; run_simd=false; run_compare=false ;;
+            -B|--bench)  run_deps=false; run_build=false; run_test=false; run_bench=true; run_parallel=false; run_simd=false; run_compare=false ;;
+            -p|--parallel) run_deps=false; run_build=false; run_test=false; run_bench=false; run_parallel=true; run_simd=false; run_compare=false ;;
+            -s|--simd)   run_deps=false; run_build=false; run_test=false; run_bench=false; run_parallel=false; run_simd=true; run_compare=false ;;
+            -c)          run_deps=false; run_build=false; run_test=false; run_bench=false; run_parallel=false; run_simd=false; run_compare=true
+                          [[ $# -gt 1 && ! "$2" =~ ^- ]] && { compare_algo="$2"; shift; } ;;
+            --no-deps)   run_deps=false ;;
+            --no-test)   run_test=false ;;
+            --no-bench)  run_bench=false ;;
+            --no-parallel) run_parallel=false ;;
+            --no-simd)   run_simd=false ;;
+            --all)       run_deps=true; run_build=true; run_test=true; run_bench=true; run_parallel=true; run_simd=true; run_compare=false ;;
+            *)           log_error "Unknown option: $1"; show_help; exit 1 ;;
         esac
+        shift
     done
     
     # Check required tools
-    check_command git
-    check_command cmake
-    check_command make
+    command -v git >/dev/null || { log_error "git not installed"; exit 1; }
+    command -v cmake >/dev/null || { log_error "cmake not installed"; exit 1; }
     
-    print_separator
-    echo -e "${GREEN}   ____      __           __  ____                  __"
-    echo -e "  / ____/___/ /___ ____  / /_/ __ \\____  ____  ____/ /"
-    echo -e " / /   / __  / __ \`/ _ \\/ __/ /_/ / __ \\/ __ \\/ __  / "
-    echo -e "/ /___/ /_/ / /_/ /  __/ /_/ ____/ /_/ / / / / /_/ /  "
-    echo -e "\\____/\\__,_/\\__, /\\___/\\__/_/    \\__,_/_/ /_/\\__,_/   "
-    echo -e "            /____/                                     ${NC}"
-    print_separator
+    # Banner
+    echo -e "${GREEN}"
+    echo "   ____      __           __  ____                  __"
+    echo "  / ____/___/ /___ ____  / /_/ __ \\____  ____  ____/ /"
+    echo " / /   / __  / __ \`/ _ \\/ __/ /_/ / __ \\/ __ \\/ __  / "
+    echo "/ /___/ /_/ / /_/ /  __/ /_/ ____/ /_/ / / / / /_/ /  "
+    echo "\\____/\\__,_/\\__, /\\___/\\__/_/    \\__,_/_/ /_/\\__,_/   "
+    echo "            /____/                                     ${NC}"
     echo ""
     
     # Execute steps
-    if $run_deps; then
-        download_dependencies
-    fi
+    $run_deps && download_dependencies
+    $run_build && build_project
+    $run_test && run_unit_tests
+    $run_parallel && run_parallel_tests
+    $run_compare && run_compare_tests "$compare_algo"
+    ($run_bench || $run_simd) && build_benchmarks
+    $run_simd && run_simd_tests
+    $run_bench && run_benchmarks
     
-    if $run_build; then
-        build_project
-    fi
-    
-    if $run_test; then
-        run_unit_tests
-    fi
-    
-    if $run_parallel; then
-        run_parallel_tests
-    fi
-    
-    if $run_compare; then
-        run_compare_tests "$compare_algo"
-    fi
-    
-    if $run_perf || $run_simd; then
-        build_benchmarks
-    fi
-    
-    if $run_simd; then
-        run_simd_tests
-    fi
-    
-    if $run_perf; then
-        run_benchmarks
-    fi
-    
-    print_separator
-    print_success "All tasks completed!"
-    print_separator
+    echo ""
+    log_ok "All tasks completed!"
 }
 
-# Run main function
 main "$@"
