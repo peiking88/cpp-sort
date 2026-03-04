@@ -24,26 +24,36 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # Get number of parallel jobs
 get_nproc() { nproc 2>/dev/null || echo 4; }
 
+# Count compilation targets in build directory
+count_targets() {
+    local build_dir="$1"
+    # Count unique compile targets in CMake build.make files
+    find "$build_dir" -name "build.make" -exec grep -h "\.cpp\.o:" {} \; 2>/dev/null | \
+        grep -v "flags.make" | grep -v "compiler_depend" | sort -u | wc -l
+}
+
 # ============================================================================
 # Compile with single-line progress display
+# Shows [current/total] format
 # ============================================================================
 compile_progress() {
     local prefix="$1"
-    stdbuf -oL -eL awk -v prefix="$prefix" -v BLUE='\033[0;34m' -v NC='\033[0m' '
+    local total="$2"
+    stdbuf -oL -eL awk -v prefix="$prefix" -v total="$total" -v BLUE='\033[0;34m' -v NC='\033[0m' '
     BEGIN { count = 0 }
     /Building C[XX]+ object/ {
         count++
         match($0, /object [^ ]+/)
         file = substr($0, RSTART+7, RLENGTH-7)
-        printf "\r\033[K%s[INFO]%s %s [%d] %s", BLUE, NC, prefix, count, file
+        printf "\r\033[K%s[INFO]%s %s [%d/%d] %s", BLUE, NC, prefix, count, total, file
         fflush(stdout)
     }
     /Linking/ {
-        printf "\r\033[K%s[INFO]%s %s linking...", BLUE, NC, prefix
+        printf "\r\033[K%s[INFO]%s %s [%d/%d] linking...", BLUE, NC, prefix, count, total
         fflush(stdout)
     }
     END {
-        printf "\r\033[K%s[INFO]%s %s compiled %d files.\n", BLUE, NC, prefix, count
+        printf "\r\033[K%s[INFO]%s %s [%d/%d] done.\n", BLUE, NC, prefix, count, (total > count ? total : count)
     }
     '
 }
@@ -94,8 +104,11 @@ build_project() {
         -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" \
         -Wno-dev 2>/dev/null
     
+    # Count targets for progress display
+    local total=$(count_targets "$build_dir")
+    
     # Build with progress
-    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building"
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building" "$total"
     
     log_ok "Main project built"
 }
@@ -137,7 +150,8 @@ build_benchmarks() {
         -DCMAKE_CXX_FLAGS="-Wno-all -Wno-extra -Wno-interference-size" \
         -Wno-dev 2>/dev/null
     
-    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building benchmarks"
+    local total=$(count_targets "$build_dir")
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building benchmarks" "$total"
     
     log_ok "Benchmarks built"
 }
@@ -163,7 +177,9 @@ run_parallel_tests() {
     # Build if needed
     cmake -S "$SCRIPT_DIR/benchmarks/sort-comparison" -B "$build_dir" \
         -DCMAKE_BUILD_TYPE=Release -Wno-dev 2>/dev/null
-    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building parallel"
+    
+    local total=$(count_targets "$build_dir")
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building parallel" "$total"
     
     "$build_dir/bench-parallel"
     log_ok "Parallel tests complete"
@@ -181,7 +197,9 @@ run_compare_tests() {
     
     cmake -S "$SCRIPT_DIR/benchmarks/sort-comparison" -B "$build_dir" \
         -DCMAKE_BUILD_TYPE=Release -Wno-dev 2>/dev/null
-    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building comparison"
+    
+    local total=$(count_targets "$build_dir")
+    cmake --build "$build_dir" -j"$nproc" -- 2>&1 | compile_progress "Building comparison" "$total"
     
     if [ "$algo" = "all" ]; then
         "$build_dir/bench-serial-parallel"
