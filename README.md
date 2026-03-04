@@ -118,25 +118,43 @@ int main()
   - Dataset size is below threshold
   - C++20 coroutine support is unavailable
 
-### Performance (100K random integers, 32 cores)
+### Performance (1M random integers, 32 cores)
 
-| Algorithm | Time (μs) | Speedup vs std::sort |
-|-----------|-----------|---------------------|
-| `parallel_simd_sorter` | 127 | **27.7x** |
-| `parallel_pdq_sorter` | 1,379 | 2.6x |
-| `parallel_grail_sorter` | 4,792 | 0.7x |
-| `parallel_merge_sorter` | 4,137 | 0.9x |
-| `parallel_tim_sorter` | 4,805 | 0.7x |
-| `parallel_heap_sorter` | 5,367 | 0.7x |
+| Algorithm | Serial (us) | Parallel (us) | Speedup |
+|-----------|-------------|---------------|---------|
+| `parallel_simd_sorter` | 1,763 | 6,505 | 0.27x* |
+| `parallel_pdq_sorter` | 14,853 | 7,619 | **1.95x** |
+| `parallel_grail_sorter` | 56,984 | 11,086 | **5.14x** |
+| `parallel_quick_sorter` | 46,814 | 9,889 | **4.73x** |
+| `parallel_heap_sorter` | 67,664 | 11,301 | **5.99x** |
+| `parallel_merge_sorter` | 47,308 | 10,223 | **4.63x** |
+| `parallel_tim_sorter` | - | - | 4-6x |
+
+_*simd_sorter is already optimal for small datasets; parallel overhead is counterproductive_
 
 ### Performance on Sorted Data (100K integers, 32 cores)
 
-| Algorithm | Time (μs) | Speedup vs std::sort |
-|-----------|-----------|---------------------|
-| `parallel_tim_sorter` | 22 | **22.8x** |
-| `parallel_pdq_sorter` | 40 | 12.5x |
-| `parallel_grail_sorter` | 366 | 1.4x |
-| `std::sort` | 502 | 1.0x |
+| Algorithm | Serial (us) | Parallel (us) | Speedup |
+|-----------|-------------|---------------|---------|
+| `parallel_tim_sorter` | 22 | 22 | **1.0x** (already optimal) |
+| `parallel_pdq_sorter` | 39 | 39 | **1.0x** |
+| `parallel_grail_sorter` | 390 | 393 | **1.0x** |
+| `parallel_merge_sorter` | 83 | 257 | 0.32x |
+
+_TimSort's adaptive nature makes it optimal for sorted data_
+
+### Large Dataset Performance (10M random integers, 32 cores)
+
+| Algorithm | Serial (us) | Parallel (us) | Speedup |
+|-----------|-------------|---------------|---------|
+| `parallel_heap_sorter` | 937,969 | 91,831 | **10.2x** |
+| `parallel_grail_sorter` | 693,035 | 88,652 | **7.8x** |
+| `parallel_quick_sorter` | 566,381 | 69,205 | **8.2x** |
+| `parallel_merge_sorter` | 559,396 | 84,134 | **6.6x** |
+| `parallel_pdq_sorter` | 164,428 | 62,990 | **2.6x** |
+| `parallel_simd_sorter` | 24,911 | 63,620 | 0.4x* |
+
+_*For SIMD-compatible types, sequential simd_sorter outperforms parallel version_
 
 ### Serial vs Parallel Performance Comparison
 

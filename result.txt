@@ -1,0 +1,560 @@
+============================================================
+[0;32m   ____      __           __  ____                  __
+  / ____/___/ /___ ____  / /_/ __ \____  ____  ____/ /
+ / /   / __  / __ `/ _ \/ __/ /_/ / __ \/ __ \/ __  / 
+/ /___/ /_/ / /_/ /  __/ /_/ ____/ /_/ / / / / /_/ /  
+\____/\__,_/\__, /\___/\__/_/    \__,_/_/ /_/\__,_/   
+            /____/                                     [0m
+============================================================
+
+============================================================
+[0;34m[INFO][0m Running serial vs parallel comparison tests (algorithm: all)...
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/li/cpp-sort/benchmarks/sort-comparison/build
+[100%] Built target bench-serial-parallel
+============================================================
+Serial vs Parallel Sorters Performance Benchmark
+============================================================
+Hardware concurrency: 32 threads
+Warmup iterations: 3
+Benchmark iterations: 10
+Selected algorithms: all
+SIMD: AVX-512 detected
+
+====================================================================================================
+Algorithm Pair               Serial (us)  Parallel (us)     Speedup     Pattern        Type      Size
+----------------------------------------------------------------------------------------------------
+grail                            4769.09        4688.30       1.02x      Random         int    100000
+grail                            5542.80        5555.99       1.00x      Random       float    100000
+grail                            5557.91        5564.27       1.00x      Random      double    100000
+grail                             389.75         393.32       0.99x      Sorted         int    100000
+grail                             465.52         465.47       1.00x      Sorted       float    100000
+grail                             533.44         533.98       1.00x      Sorted      double    100000
+grail                             419.01         421.22       0.99x     Reverse         int    100000
+grail                             477.57         508.55       0.94x     Reverse       float    100000
+grail                             540.01         545.91       0.99x     Reverse      double    100000
+grail                            1311.99        1311.30       1.00x  Nearly Sor         int    100000
+grail                            1608.00        1597.31       1.01x  Nearly Sor       float    100000
+grail                            1557.98        1564.48       1.00x  Nearly Sor      double    100000
+grail                            7048.04        7089.00       0.99x  Few Unique         int    100000
+grail                            4789.16        4786.22       1.00x  Few Unique       float    100000
+grail                            4779.38        4786.30       1.00x  Few Unique      double    100000
+grail                           26872.90       26659.59       1.01x      Random         int    500000
+grail                           31740.49       31790.12       1.00x      Random       float    500000
+grail                           31713.14       31627.85       1.00x      Random      double    500000
+grail                            2203.83        2209.01       1.00x      Sorted         int    500000
+grail                            2657.18        2661.31       1.00x      Sorted       float    500000
+grail                            3134.58        3134.46       1.00x      Sorted      double    500000
+grail                            2469.85        2471.11       1.00x     Reverse         int    500000
+grail                            3038.61        3037.75       1.00x     Reverse       float    500000
+grail                            3423.22        3426.47       1.00x     Reverse      double    500000
+grail                            7377.85        7382.04       1.00x  Nearly Sor         int    500000
+grail                            9008.58        9002.60       1.00x  Nearly Sor       float    500000
+grail                            8768.02        8780.26       1.00x  Nearly Sor      double    500000
+grail                           22357.36       22306.10       1.00x  Few Unique         int    500000
+grail                           27266.43       27393.79       1.00x  Few Unique       float    500000
+grail                           27415.50       27343.67       1.00x  Few Unique      double    500000
+grail                           56984.33       11086.21       5.14x      Random         int   1000000
+grail                           67443.09       14405.65       4.68x      Random       float   1000000
+grail                           67249.90       14749.44       4.56x      Random      double   1000000
+grail                            5661.88        2294.85       2.47x      Sorted         int   1000000
+grail                            6443.75        2377.13       2.71x      Sorted       float   1000000
+grail                            7256.57        3200.14       2.27x      Sorted      double   1000000
+grail                            5793.06        2486.37       2.33x     Reverse         int   1000000
+grail                            7107.45        2661.28       2.67x     Reverse       float   1000000
+grail                            7716.75        3345.46       2.31x     Reverse      double   1000000
+grail                           16497.72        4269.76       3.86x  Nearly Sor         int   1000000
+grail                           19981.69        4756.94       4.20x  Nearly Sor       float   1000000
+grail                           19499.12        5437.21       3.59x  Nearly Sor      double   1000000
+grail                           47381.21        7047.06       6.72x  Few Unique         int   1000000
+grail                           58747.44        8245.07       7.13x  Few Unique       float   1000000
+grail                           59010.71        8320.19       7.09x  Few Unique      double   1000000
+grail                          319362.98       45816.43       6.97x      Random         int   5000000
+grail                          376066.32       56485.73       6.66x      Random       float   5000000
+grail                          394022.89       60415.09       6.52x      Random      double   5000000
+grail                           25887.85        8182.98       3.16x      Sorted         int   5000000
+grail                           32763.65        7689.44       4.26x      Sorted       float   5000000
+grail                           58542.85       17899.46       3.27x      Sorted      double   5000000
+grail                           29875.25        8645.28       3.46x     Reverse         int   5000000
+grail                           33922.51        8516.42       3.98x     Reverse       float   5000000
+grail                           72595.69       18082.93       4.01x     Reverse      double   5000000
+grail                           90142.66       15655.54       5.76x  Nearly Sor         int   5000000
+grail                          107353.99       18160.98       5.91x  Nearly Sor       float   5000000
+grail                          127929.54       23032.71       5.55x  Nearly Sor      double   5000000
+grail                          276287.36       23690.67      11.66x  Few Unique         int   5000000
+grail                          332609.22       30507.12      10.90x  Few Unique       float   5000000
+grail                          353904.65       33516.09      10.56x  Few Unique      double   5000000
+grail                          693035.13       88651.92       7.82x      Random         int  10000000
+grail                          812361.15      107922.03       7.53x      Random       float  10000000
+grail                          855850.90      122315.90       7.00x      Random      double  10000000
+grail                           82155.49       16906.83       4.86x      Sorted         int  10000000
+grail                           91132.16       20153.02       4.52x      Sorted       float  10000000
+grail                          165386.76       36408.16       4.54x      Sorted      double  10000000
+grail                          118127.56       19845.78       5.95x     Reverse         int  10000000
+grail                          124267.82       17940.33       6.93x     Reverse       float  10000000
+grail                          215627.70       44645.04       4.83x     Reverse      double  10000000
+grail                          217532.91       30873.89       7.05x  Nearly Sor         int  10000000
+grail                          255468.61       34592.85       7.39x  Nearly Sor       float  10000000
+grail                          311806.65       54550.10       5.72x  Nearly Sor      double  10000000
+grail                          609240.67       45993.03      13.25x  Few Unique         int  10000000
+grail                          732922.53       58324.01      12.57x  Few Unique       float  10000000
+grail                          774936.22       72649.22      10.67x  Few Unique      double  10000000
+heap                             5371.97        5352.40       1.00x      Random         int    100000
+heap                             6060.14        6032.69       1.00x      Random       float    100000
+heap                             6290.16        6272.11       1.00x      Random      double    100000
+heap                             2664.50        2673.23       1.00x      Sorted         int    100000
+heap                             2966.31        2951.47       1.01x      Sorted       float    100000
+heap                             2957.46        2961.82       1.00x      Sorted      double    100000
+heap                             3027.43        3022.09       1.00x     Reverse         int    100000
+heap                             3463.91        3465.04       1.00x     Reverse       float    100000
+heap                             3475.21        3484.27       1.00x     Reverse      double    100000
+heap                             3130.43        3124.10       1.00x  Nearly Sor         int    100000
+heap                             3535.07        3539.68       1.00x  Nearly Sor       float    100000
+heap                             3577.42        3596.29       0.99x  Nearly Sor      double    100000
+heap                             5193.21        5184.82       1.00x  Few Unique         int    100000
+heap                             6054.17        6085.02       0.99x  Few Unique       float    100000
+heap                             6201.93        6170.50       1.01x  Few Unique      double    100000
+heap                            31594.74       31652.19       1.00x      Random         int    500000
+heap                            35558.06       35738.83       0.99x      Random       float    500000
+heap                            37517.44       37526.27       1.00x      Random      double    500000
+heap                            13949.34       13980.59       1.00x      Sorted         int    500000
+heap                            15314.78       15348.65       1.00x      Sorted       float    500000
+heap                            15377.63       15387.48       1.00x      Sorted      double    500000
+heap                            15673.14       15691.48       1.00x     Reverse         int    500000
+heap                            17398.67       17377.33       1.00x     Reverse       float    500000
+heap                            17670.49       17331.95       1.02x     Reverse      double    500000
+heap                            17057.52       17049.39       1.00x  Nearly Sor         int    500000
+heap                            18388.07       18371.43       1.00x  Nearly Sor       float    500000
+heap                            18906.84       18816.46       1.00x  Nearly Sor      double    500000
+heap                            30427.08       30435.10       1.00x  Few Unique         int    500000
+heap                            35223.41       35380.89       1.00x  Few Unique       float    500000
+heap                            36830.14       36438.49       1.01x  Few Unique      double    500000
+heap                            67663.84       11300.54       5.99x      Random         int   1000000
+heap                            75647.25       14948.62       5.06x      Random       float   1000000
+heap                            80934.17       15290.66       5.29x      Random      double   1000000
+heap                            28490.35        4628.11       6.16x      Sorted         int   1000000
+heap                            30705.38        5269.46       5.83x      Sorted       float   1000000
+heap                            31005.20        5399.37       5.74x      Sorted      double   1000000
+heap                            32546.65        4996.05       6.51x     Reverse         int   1000000
+heap                            35361.67        5861.40       6.03x     Reverse       float   1000000
+heap                            36198.31        5753.11       6.29x     Reverse      double   1000000
+heap                            35152.96        6133.19       5.73x  Nearly Sor         int   1000000
+heap                            38014.82        6936.39       5.48x  Nearly Sor       float   1000000
+heap                            38939.00        7447.16       5.23x  Nearly Sor      double   1000000
+heap                            65732.04        6780.26       9.69x  Few Unique         int   1000000
+heap                            74426.42        8958.35       8.31x  Few Unique       float   1000000
+heap                            79716.47        9425.55       8.46x  Few Unique      double   1000000
+heap                           397166.37       53933.85       7.36x      Random         int   5000000
+heap                           448359.05       55838.05       8.03x      Random       float   5000000
+heap                           517721.47       60911.53       8.50x      Random      double   5000000
+heap                           151176.27       15115.10      10.00x      Sorted         int   5000000
+heap                           161475.00       16555.96       9.75x      Sorted       float   5000000
+heap                           168275.79       20386.76       8.25x      Sorted      double   5000000
+heap                           169306.93       14553.50      11.63x     Reverse         int   5000000
+heap                           182194.09       16632.28      10.95x     Reverse       float   5000000
+heap                           191209.89       21511.62       8.89x     Reverse      double   5000000
+heap                           191469.88       20167.82       9.49x  Nearly Sor         int   5000000
+heap                           205509.39       25053.08       8.20x  Nearly Sor       float   5000000
+heap                           226849.79       28873.77       7.86x  Nearly Sor      double   5000000
+heap                           392115.44       25197.50      15.56x  Few Unique         int   5000000
+heap                           437696.83       32124.45      13.63x  Few Unique       float   5000000
+heap                           510921.47       36135.04      14.14x  Few Unique      double   5000000
+heap                           937968.87       91831.09      10.21x      Random         int  10000000
+heap                          1027394.07      111501.20       9.21x      Random       float  10000000
+heap                          1313468.74      125312.70      10.48x      Random      double  10000000
+heap                           309376.04       26422.17      11.71x      Sorted         int  10000000
+heap                           331557.09       30706.66      10.80x      Sorted       float  10000000
+heap                           346232.45       46595.88       7.43x      Sorted      double  10000000
+heap                           353102.60       29514.87      11.96x     Reverse         int  10000000
+heap                           377794.42       33982.43      11.12x     Reverse       float  10000000
+heap                           402007.48       54181.49       7.42x     Reverse      double  10000000
+heap                           421061.26       37797.79      11.14x  Nearly Sor         int  10000000
+heap                           445822.52       44924.30       9.92x  Nearly Sor       float  10000000
+heap                           530819.88       63538.74       8.35x  Nearly Sor      double  10000000
+heap                           916405.17       48299.93      18.97x  Few Unique         int  10000000
+heap                          1011275.36       57682.37      17.53x  Few Unique       float  10000000
+heap                          1289827.68       75491.32      17.09x  Few Unique      double  10000000
+merge                            3910.45        4161.45       0.94x      Random         int    100000
+merge                            4764.41        5095.00       0.94x      Random       float    100000
+merge                            4706.10        5112.63       0.92x      Random      double    100000
+merge                              82.57         257.04       0.32x      Sorted         int    100000
+merge                              80.33         369.01       0.22x      Sorted       float    100000
+merge                              83.75         319.14       0.26x      Sorted      double    100000
+merge                             499.79         464.36       1.08x     Reverse         int    100000
+merge                             663.01         463.45       1.43x     Reverse       float    100000
+merge                             680.71         516.36       1.32x     Reverse      double    100000
+merge                             811.82         842.73       0.96x  Nearly Sor         int    100000
+merge                             995.74        1069.63       0.93x  Nearly Sor       float    100000
+merge                             970.85        1013.65       0.96x  Nearly Sor      double    100000
+merge                            2845.11        3109.69       0.91x  Few Unique         int    100000
+merge                            3610.74        4014.44       0.90x  Few Unique       float    100000
+merge                            3621.03        4099.82       0.88x  Few Unique      double    100000
+merge                           22300.41       23885.52       0.93x      Random         int    500000
+merge                           26699.27       29110.57       0.92x      Random       float    500000
+merge                           26816.24       29299.49       0.92x      Random      double    500000
+merge                             381.80        1547.22       0.25x      Sorted         int    500000
+merge                             380.10        2981.20       0.13x      Sorted       float    500000
+merge                             407.79        1985.88       0.21x      Sorted      double    500000
+merge                            2904.13        2517.68       1.15x     Reverse         int    500000
+merge                            3943.74        2609.38       1.51x     Reverse       float    500000
+merge                            4280.65        3007.41       1.42x     Reverse      double    500000
+merge                            4638.62        4827.33       0.96x  Nearly Sor         int    500000
+merge                            5337.17        6111.42       0.87x  Nearly Sor       float    500000
+merge                            5797.81        5818.34       1.00x  Nearly Sor      double    500000
+merge                           17149.62       18938.69       0.91x  Few Unique         int    500000
+merge                           21338.35       23833.21       0.90x  Few Unique       float    500000
+merge                           21509.82       23958.45       0.90x  Few Unique      double    500000
+merge                           47307.96       10222.92       4.63x      Random         int   1000000
+merge                           56423.81       13434.14       4.20x      Random       float   1000000
+merge                           56861.41       13503.97       4.21x      Random      double   1000000
+merge                             909.68        2050.85       0.44x      Sorted         int   1000000
+merge                             884.05        2179.17       0.41x      Sorted       float   1000000
+merge                             957.54        2566.70       0.37x      Sorted      double   1000000
+merge                            6148.71        2277.61       2.70x     Reverse         int   1000000
+merge                            8069.92        2437.15       3.31x     Reverse       float   1000000
+merge                            8447.47        2904.89       2.91x     Reverse      double   1000000
+merge                            9755.48        3597.84       2.71x  Nearly Sor         int   1000000
+merge                           11317.30        4063.55       2.79x  Nearly Sor       float   1000000
+merge                           11696.17        4340.67       2.69x  Nearly Sor      double   1000000
+merge                           36200.16        5637.75       6.42x  Few Unique         int   1000000
+merge                           45803.72        7335.23       6.24x  Few Unique       float   1000000
+merge                           46314.41        7901.75       5.86x  Few Unique      double   1000000
+merge                          266698.32       43724.83       6.10x      Random         int   5000000
+merge                          317843.51       54122.60       5.87x      Random       float   5000000
+merge                          328435.52       57693.01       5.69x      Random      double   5000000
+merge                            3641.43        6111.97       0.60x      Sorted         int   5000000
+merge                            3682.95       11403.75       0.32x      Sorted       float   5000000
+merge                            6628.73       13204.27       0.50x      Sorted      double   5000000
+merge                           35232.64        8060.17       4.37x     Reverse         int   5000000
+merge                           54336.40        8456.29       6.43x     Reverse       float   5000000
+merge                           60024.34       16079.27       3.73x     Reverse      double   5000000
+merge                           55898.48       13414.64       4.17x  Nearly Sor         int   5000000
+merge                           67094.72       15300.84       4.39x  Nearly Sor       float   5000000
+merge                           72335.71       20072.91       3.60x  Nearly Sor      double   5000000
+merge                          211204.93       22906.03       9.22x  Few Unique         int   5000000
+merge                          264065.09       28966.03       9.12x  Few Unique       float   5000000
+merge                          274092.35       31346.86       8.74x  Few Unique      double   5000000
+merge                          559396.34       84133.92       6.65x      Random         int  10000000
+merge                          669182.82      103585.87       6.46x      Random       float  10000000
+merge                          690916.73      117212.36       5.89x      Random      double  10000000
+merge                            9029.88       17920.29       0.50x      Sorted         int  10000000
+merge                            8908.57       18801.26       0.47x      Sorted       float  10000000
+merge                           14776.49       35399.38       0.42x      Sorted      double  10000000
+merge                           73872.94       18562.17       3.98x     Reverse         int  10000000
+merge                          110183.96       18822.52       5.85x     Reverse       float  10000000
+merge                          130745.17       45729.30       2.86x     Reverse      double  10000000
+merge                          121988.65       30098.40       4.05x  Nearly Sor         int  10000000
+merge                          146653.24       29463.35       4.98x  Nearly Sor       float  10000000
+merge                          157393.35       49327.10       3.19x  Nearly Sor      double  10000000
+merge                          453773.37       42542.58      10.67x  Few Unique         int  10000000
+merge                          559506.26       52071.94      10.74x  Few Unique       float  10000000
+merge                          582979.13       68078.91       8.56x  Few Unique      double  10000000
+pdq                              1351.59        1372.53       0.98x      Random         int    100000
+pdq                              1509.53        1500.64       1.01x      Random       float    100000
+pdq                              1516.96        1522.76       1.00x      Random      double    100000
+pdq                                39.23          39.38       1.00x      Sorted         int    100000
+pdq                                40.69          40.41       1.01x      Sorted       float    100000
+pdq                                48.06          48.43       0.99x      Sorted      double    100000
+pdq                                79.25          79.60       1.00x     Reverse         int    100000
+pdq                                82.62          82.46       1.00x     Reverse       float    100000
+pdq                                90.37          90.97       0.99x     Reverse      double    100000
+pdq                               665.69         677.43       0.98x  Nearly Sor         int    100000
+pdq                               713.34         713.09       1.00x  Nearly Sor       float    100000
+pdq                               727.99         722.48       1.01x  Nearly Sor      double    100000
+pdq                               505.12         503.07       1.00x  Few Unique         int    100000
+pdq                               584.72         587.58       1.00x  Few Unique       float    100000
+pdq                               612.65         605.08       1.01x  Few Unique      double    100000
+pdq                              7211.16        7254.95       0.99x      Random         int    500000
+pdq                              8029.73        7977.44       1.01x      Random       float    500000
+pdq                              8079.07        8101.92       1.00x      Random      double    500000
+pdq                               206.76         209.74       0.99x      Sorted         int    500000
+pdq                               218.22         218.86       1.00x      Sorted       float    500000
+pdq                               248.89         248.79       1.00x      Sorted      double    500000
+pdq                               413.31         413.11       1.00x     Reverse         int    500000
+pdq                               428.47         426.73       1.00x     Reverse       float    500000
+pdq                               467.14         496.85       0.94x     Reverse      double    500000
+pdq                              3800.26        3793.80       1.00x  Nearly Sor         int    500000
+pdq                              4104.55        4094.10       1.00x  Nearly Sor       float    500000
+pdq                              4142.98        4148.64       1.00x  Nearly Sor      double    500000
+pdq                              3289.24        3278.08       1.00x  Few Unique         int    500000
+pdq                              3669.36        3664.57       1.00x  Few Unique       float    500000
+pdq                              3696.95        3703.21       1.00x  Few Unique      double    500000
+pdq                             14853.30        7618.72       1.95x      Random         int   1000000
+pdq                             16608.14        9301.76       1.79x      Random       float   1000000
+pdq                             16949.72        9626.26       1.76x      Random      double   1000000
+pdq                               435.30        1653.44       0.26x      Sorted         int   1000000
+pdq                               457.13        1780.18       0.26x      Sorted       float   1000000
+pdq                               504.00        1945.48       0.26x      Sorted      double   1000000
+pdq                               847.37        2003.73       0.42x     Reverse         int   1000000
+pdq                               886.22        2082.85       0.43x     Reverse       float   1000000
+pdq                               935.51        2385.24       0.39x     Reverse      double   1000000
+pdq                              8020.98        2970.43       2.70x  Nearly Sor         int   1000000
+pdq                              8663.03        3236.54       2.68x  Nearly Sor       float   1000000
+pdq                              8700.05        3526.61       2.47x  Nearly Sor      double   1000000
+pdq                              6829.67        6562.38       1.04x  Few Unique         int   1000000
+pdq                              7541.49        8128.27       0.93x  Few Unique       float   1000000
+pdq                              7954.90        8186.22       0.97x  Few Unique      double   1000000
+pdq                             79833.86       31621.42       2.52x      Random         int   5000000
+pdq                             89657.96       40073.83       2.24x      Random       float   5000000
+pdq                             91306.96       42512.28       2.15x      Random      double   5000000
+pdq                              2594.72        4888.36       0.53x      Sorted         int   5000000
+pdq                              2568.23        4958.49       0.52x      Sorted       float   5000000
+pdq                              4030.07        7089.14       0.57x      Sorted      double   5000000
+pdq                              4571.37        5498.18       0.83x     Reverse         int   5000000
+pdq                              4753.02        6642.77       0.72x     Reverse       float   5000000
+pdq                              6714.10        9020.54       0.74x     Reverse      double   5000000
+pdq                             43844.69       10139.58       4.32x  Nearly Sor         int   5000000
+pdq                             47280.41       11971.83       3.95x  Nearly Sor       float   5000000
+pdq                             49229.86       12679.69       3.88x  Nearly Sor      double   5000000
+pdq                             39159.72       30055.18       1.30x  Few Unique         int   5000000
+pdq                             43164.34       37906.84       1.14x  Few Unique       float   5000000
+pdq                             46438.17       39880.38       1.16x  Few Unique      double   5000000
+pdq                            164427.69       62990.11       2.61x      Random         int  10000000
+pdq                            184242.45       83526.73       2.21x      Random       float  10000000
+pdq                            188301.21       86633.68       2.17x      Random      double  10000000
+pdq                              5838.36        8942.18       0.65x      Sorted         int  10000000
+pdq                              5858.25        9358.15       0.63x      Sorted       float  10000000
+pdq                              8865.52       13878.33       0.64x      Sorted      double  10000000
+pdq                              9769.25       10281.83       0.95x     Reverse         int  10000000
+pdq                             10197.39       12050.78       0.85x     Reverse       float  10000000
+pdq                             14099.65       19062.45       0.74x     Reverse      double  10000000
+pdq                             92441.38       17994.11       5.14x  Nearly Sor         int  10000000
+pdq                             98583.25       21015.79       4.69x  Nearly Sor       float  10000000
+pdq                            102916.28       24174.27       4.26x  Nearly Sor      double  10000000
+pdq                             83105.23       60841.65       1.37x  Few Unique         int  10000000
+pdq                             91909.20       78144.99       1.18x  Few Unique       float  10000000
+pdq                             98125.79       78354.97       1.25x  Few Unique      double  10000000
+quick                            4144.24        3611.49       1.15x      Random         int    100000
+quick                            4609.16        4441.77       1.04x      Random       float    100000
+quick                            4855.45        4394.50       1.10x      Random      double    100000
+quick                             410.42         469.31       0.87x      Sorted         int    100000
+quick                             466.09         457.94       1.02x      Sorted       float    100000
+quick                             565.17         483.21       1.17x      Sorted      double    100000
+quick                             472.51         310.47       1.52x     Reverse         int    100000
+quick                             534.34         356.68       1.50x     Reverse       float    100000
+quick                             631.41         381.64       1.65x     Reverse      double    100000
+quick                             902.10         919.86       0.98x  Nearly Sor         int    100000
+quick                            1036.92        1054.50       0.98x  Nearly Sor       float    100000
+quick                            1148.26        1054.77       1.09x  Nearly Sor      double    100000
+quick                            2285.98        2364.86       0.97x  Few Unique         int    100000
+quick                            2894.75        3242.89       0.89x  Few Unique       float    100000
+quick                            3054.29        3164.22       0.97x  Few Unique      double    100000
+quick                           22450.75       20459.06       1.10x      Random         int    500000
+quick                           26397.61       25707.29       1.03x      Random       float    500000
+quick                           27717.18       24985.22       1.11x      Random      double    500000
+quick                            2186.94        2654.59       0.82x      Sorted         int    500000
+quick                            2521.42        2638.88       0.96x      Sorted       float    500000
+quick                            2528.62        2693.91       0.94x      Sorted      double    500000
+quick                            2553.64        1787.34       1.43x     Reverse         int    500000
+quick                            2925.23        2184.06       1.34x     Reverse       float    500000
+quick                            2915.63        2029.34       1.44x     Reverse      double    500000
+quick                            5175.75        5214.72       0.99x  Nearly Sor         int    500000
+quick                            5980.54        5917.96       1.01x  Nearly Sor       float    500000
+quick                            6121.28        5924.84       1.03x  Nearly Sor      double    500000
+quick                           14594.39       13750.81       1.06x  Few Unique         int    500000
+quick                           18389.57       18953.36       0.97x  Few Unique       float    500000
+quick                           18867.59       18782.01       1.00x  Few Unique      double    500000
+quick                           46814.01        9889.12       4.73x      Random         int   1000000
+quick                           55559.85       12854.46       4.32x      Random       float   1000000
+quick                           56455.19       12497.02       4.52x      Random      double   1000000
+quick                            5021.84        2110.16       2.38x      Sorted         int   1000000
+quick                            5528.73        2190.83       2.52x      Sorted       float   1000000
+quick                            5489.20        2590.70       2.12x      Sorted      double   1000000
+quick                            5578.06        4946.53       1.13x     Reverse         int   1000000
+quick                            6193.30        5895.58       1.05x     Reverse       float   1000000
+quick                            6479.92        6269.89       1.03x     Reverse      double   1000000
+quick                           11493.74        3110.42       3.70x  Nearly Sor         int   1000000
+quick                           12648.32        3552.23       3.56x  Nearly Sor       float   1000000
+quick                           13049.20        3771.22       3.46x  Nearly Sor      double   1000000
+quick                           31957.98        8553.13       3.74x  Few Unique         int   1000000
+quick                           39440.42       10771.40       3.66x  Few Unique       float   1000000
+quick                           41005.49       11200.36       3.66x  Few Unique      double   1000000
+quick                          266295.27       35185.23       7.57x      Random         int   5000000
+quick                          314984.24       47618.95       6.61x      Random       float   5000000
+quick                          325646.68       48587.24       6.70x      Random      double   5000000
+quick                           27571.10        6114.96       4.51x      Sorted         int   5000000
+quick                           29489.16        7177.88       4.11x      Sorted       float   5000000
+quick                           32082.49        9640.95       3.33x      Sorted      double   5000000
+quick                           30316.88       16067.98       1.89x     Reverse         int   5000000
+quick                           40682.60       19284.32       2.11x     Reverse       float   5000000
+quick                           35801.75       23017.19       1.56x     Reverse      double   5000000
+quick                           61816.86       10561.09       5.85x  Nearly Sor         int   5000000
+quick                           71409.21       12812.15       5.57x  Nearly Sor       float   5000000
+quick                           79102.96       13995.90       5.65x  Nearly Sor      double   5000000
+quick                          188335.86       33709.52       5.59x  Few Unique         int   5000000
+quick                          231079.10       43740.47       5.28x  Few Unique       float   5000000
+quick                          242623.27       46254.72       5.25x  Few Unique      double   5000000
+quick                          566381.16       69205.32       8.18x      Random         int  10000000
+quick                          661277.93       95723.90       6.91x      Random       float  10000000
+quick                          674395.67      101783.13       6.63x      Random      double  10000000
+quick                           56959.25       11484.89       4.96x      Sorted         int  10000000
+quick                           64329.15       13202.43       4.87x      Sorted       float  10000000
+quick                           67115.64       16929.09       3.96x      Sorted      double  10000000
+quick                           65500.36       29150.18       2.25x     Reverse         int  10000000
+quick                           73013.32       33952.51       2.15x     Reverse       float  10000000
+quick                           76041.43       40778.84       1.86x     Reverse      double  10000000
+quick                          130531.61       18336.67       7.12x  Nearly Sor         int  10000000
+quick                          150261.21       22321.57       6.73x  Nearly Sor       float  10000000
+quick                          155994.48       27745.46       5.62x  Nearly Sor      double  10000000
+quick                          416169.08       65024.90       6.40x  Few Unique         int  10000000
+quick                          488723.48       92014.04       5.31x  Few Unique       float  10000000
+quick                          510474.34       85682.49       5.96x  Few Unique      double  10000000
+simd                              139.69         150.00       0.93x      Random         int    100000
+simd                              150.36         149.54       1.01x      Random       float    100000
+simd                              270.77         268.84       1.01x      Random      double    100000
+simd                              141.83         140.93       1.01x      Sorted         int    100000
+simd                              148.10         147.84       1.00x      Sorted       float    100000
+simd                              273.87         275.52       0.99x      Sorted      double    100000
+simd                              136.99         136.58       1.00x     Reverse         int    100000
+simd                              144.13         143.20       1.01x     Reverse       float    100000
+simd                              268.64         267.49       1.00x     Reverse      double    100000
+simd                              135.47         135.06       1.00x  Nearly Sor         int    100000
+simd                              142.71         142.03       1.00x  Nearly Sor       float    100000
+simd                              260.35         259.37       1.00x  Nearly Sor      double    100000
+simd                              129.92         130.99       0.99x  Few Unique         int    100000
+simd                              137.14         136.11       1.01x  Few Unique       float    100000
+simd                              249.45         250.34       1.00x  Few Unique      double    100000
+simd                              818.95         813.26       1.01x      Random         int    500000
+simd                              852.87         850.93       1.00x      Random       float    500000
+simd                             1610.41        1609.49       1.00x      Random      double    500000
+simd                              771.70         772.64       1.00x      Sorted         int    500000
+simd                              807.06         805.95       1.00x      Sorted       float    500000
+simd                             1605.08        1601.96       1.00x      Sorted      double    500000
+simd                              811.81         808.16       1.00x     Reverse         int    500000
+simd                              845.20         841.80       1.00x     Reverse       float    500000
+simd                             1629.97        1628.56       1.00x     Reverse      double    500000
+simd                              893.89         883.90       1.01x  Nearly Sor         int    500000
+simd                              925.92         923.38       1.00x  Nearly Sor       float    500000
+simd                             1769.97        1769.13       1.00x  Nearly Sor      double    500000
+simd                              794.95         795.13       1.00x  Few Unique         int    500000
+simd                              858.85         842.69       1.02x  Few Unique       float    500000
+simd                             1620.58        1600.83       1.01x  Few Unique      double    500000
+simd                             1763.25        6505.12       0.27x      Random         int   1000000
+simd                             1872.43        8132.79       0.23x      Random       float   1000000
+simd                             3480.31        8593.54       0.40x      Random      double   1000000
+simd                             1788.27        1921.35       0.93x      Sorted         int   1000000
+simd                             1854.12        2000.88       0.93x      Sorted       float   1000000
+simd                             3481.77        2738.67       1.27x      Sorted      double   1000000
+simd                             1851.25        1935.41       0.96x     Reverse         int   1000000
+simd                             1901.26        1984.79       0.96x     Reverse       float   1000000
+simd                             3432.72        2675.21       1.28x     Reverse      double   1000000
+simd                             1946.25        2569.84       0.76x  Nearly Sor         int   1000000
+simd                             2040.44        3057.03       0.67x  Nearly Sor       float   1000000
+simd                             3862.07        3671.56       1.05x  Nearly Sor      double   1000000
+simd                             1765.11        2352.33       0.75x  Few Unique         int   1000000
+simd                             1846.91        2930.48       0.63x  Few Unique       float   1000000
+simd                             3485.98        3464.42       1.01x  Few Unique      double   1000000
+simd                            10343.85       31148.14       0.33x      Random         int   5000000
+simd                            10835.60       38498.31       0.28x      Random       float   5000000
+simd                            22737.60       44294.78       0.51x      Random      double   5000000
+simd                            10683.13        5393.51       1.98x      Sorted         int   5000000
+simd                            11018.47        6767.13       1.63x      Sorted       float   5000000
+simd                            22072.67       12759.05       1.73x      Sorted      double   5000000
+simd                            10571.88        6612.72       1.60x     Reverse         int   5000000
+simd                            10977.99       11065.02       0.99x     Reverse       float   5000000
+simd                            22346.91       15790.74       1.42x     Reverse      double   5000000
+simd                            11333.98       14046.25       0.81x  Nearly Sor         int   5000000
+simd                            11739.36       11612.28       1.01x  Nearly Sor       float   5000000
+simd                            24519.34       16673.33       1.47x  Nearly Sor      double   5000000
+simd                            10226.99        9301.40       1.10x  Few Unique         int   5000000
+simd                            10722.35       16695.82       0.64x  Few Unique       float   5000000
+simd                            22205.32       17653.18       1.26x  Few Unique      double   5000000
+simd                            24911.18       63619.59       0.39x      Random         int  10000000
+simd                            24629.68       83184.00       0.30x      Random       float  10000000
+simd                            51177.37       98654.74       0.52x      Random      double  10000000
+simd                            23560.29       17017.20       1.38x      Sorted         int  10000000
+simd                            24443.87       17851.10       1.37x      Sorted       float  10000000
+simd                            51621.77       33421.27       1.54x      Sorted      double  10000000
+simd                            24181.06       17269.20       1.40x     Reverse         int  10000000
+simd                            24701.02       16989.67       1.45x     Reverse       float  10000000
+simd                            52073.43       44744.42       1.16x     Reverse      double  10000000
+simd                            26069.04       20697.98       1.26x  Nearly Sor         int  10000000
+simd                            26369.06       24227.36       1.09x  Nearly Sor       float  10000000
+simd                            56471.71       46210.12       1.22x  Nearly Sor      double  10000000
+simd                            25255.69       19957.75       1.27x  Few Unique         int  10000000
+simd                            24304.18       26865.83       0.90x  Few Unique       float  10000000
+simd                            50213.24       48405.35       1.04x  Few Unique      double  10000000
+tim                              4901.57        4856.19       1.01x      Random         int    100000
+tim                              5622.25        5597.91       1.00x      Random       float    100000
+tim                              5800.95        5834.95       0.99x      Random      double    100000
+tim                                21.68          21.91       0.99x      Sorted         int    100000
+tim                                24.53          23.67       1.04x      Sorted       float    100000
+tim                                31.13          30.74       1.01x      Sorted      double    100000
+tim                                23.71          23.73       1.00x     Reverse         int    100000
+tim                                42.39          42.61       0.99x     Reverse       float    100000
+tim                                50.03          37.33       1.34x     Reverse      double    100000
+tim                              1028.87        1020.30       1.01x  Nearly Sor         int    100000
+tim                              1132.64        1120.70       1.01x  Nearly Sor       float    100000
+tim                              1221.27        1216.10       1.00x  Nearly Sor      double    100000
+tim                              3948.31        3951.40       1.00x  Few Unique         int    100000
+tim                              4664.27        4657.63       1.00x  Few Unique       float    100000
+tim                              4798.89        4810.87       1.00x  Few Unique      double    100000
+tim                             28102.13       28101.99       1.00x      Random         int    500000
+tim                             32192.14       32168.14       1.00x      Random       float    500000
+tim                             33093.23       32893.78       1.01x      Random      double    500000
+tim                               115.74         116.08       1.00x      Sorted         int    500000
+tim                               127.94         127.92       1.00x      Sorted       float    500000
+tim                               152.50         152.60       1.00x      Sorted      double    500000
+tim                               131.21         135.25       0.97x     Reverse         int    500000
+tim                               227.53         226.65       1.00x     Reverse       float    500000
+tim                               268.47         193.48       1.39x     Reverse      double    500000
+tim                              5623.75        5643.09       1.00x  Nearly Sor         int    500000
+tim                              6219.93        6215.10       1.00x  Nearly Sor       float    500000
+tim                              6568.81        6565.61       1.00x  Nearly Sor      double    500000
+tim                             22850.56       22835.00       1.00x  Few Unique         int    500000
+tim                             26924.24       26846.19       1.00x  Few Unique       float    500000
+tim                             28009.32       27997.15       1.00x  Few Unique      double    500000
+tim                             58520.33       11188.14       5.23x      Random         int   1000000
+tim                             67781.13       14159.02       4.79x      Random       float   1000000
+tim                             70492.03       14454.78       4.88x      Random      double   1000000
+tim                               279.30        1711.63       0.16x      Sorted         int   1000000
+tim                               294.95        1895.26       0.16x      Sorted       float   1000000
+tim                               339.90        2081.11       0.16x      Sorted      double   1000000
+tim                               282.39        1752.35       0.16x     Reverse         int   1000000
+tim                               480.73        1815.11       0.26x     Reverse       float   1000000
+tim                               379.50        2466.08       0.15x     Reverse      double   1000000
+tim                             11460.30        3447.47       3.32x  Nearly Sor         int   1000000
+tim                             12590.38        3869.11       3.25x  Nearly Sor       float   1000000
+tim                             13551.99        4292.94       3.16x  Nearly Sor      double   1000000
+tim                             49184.52        6493.67       7.57x  Few Unique         int   1000000
+tim                             57712.47        8298.52       6.95x  Few Unique       float   1000000
+tim                             59672.94        8642.48       6.90x  Few Unique      double   1000000
+tim                            327052.03       44974.24       7.27x      Random         int   5000000
+tim                            378898.81       55084.60       6.88x      Random       float   5000000
+tim                            387778.31       57875.93       6.70x      Random      double   5000000
+tim                              1593.68        8933.13       0.18x      Sorted         int   5000000
+tim                              1835.78        5488.17       0.33x      Sorted       float   5000000
+tim                              2932.66       10525.23       0.28x      Sorted      double   5000000
+tim                              1810.56        6312.40       0.29x     Reverse         int   5000000
+tim                              2681.37       11013.32       0.24x     Reverse       float   5000000
+tim                              4076.25       14377.70       0.28x     Reverse      double   5000000
+tim                             61212.75       16616.24       3.68x  Nearly Sor         int   5000000
+tim                             67279.60       13969.91       4.82x  Nearly Sor       float   5000000
+tim                             75285.02       18535.71       4.06x  Nearly Sor      double   5000000
+tim                            274461.84       23955.09      11.46x  Few Unique         int   5000000
+tim                            324997.85       29681.48      10.95x  Few Unique       float   5000000
+tim                            333933.04       32389.62      10.31x  Few Unique      double   5000000
+tim                            682848.46       88675.34       7.70x      Random         int  10000000
+tim                            781056.34      108659.21       7.19x      Random       float  10000000
+tim                            812339.11      121796.73       6.67x      Random      double  10000000
+tim                              3599.75       12096.96       0.30x      Sorted         int  10000000
+tim                              3938.52       12146.76       0.32x      Sorted       float  10000000
+tim                              6825.21       30907.59       0.22x      Sorted      double  10000000
+tim                              4949.02       14678.68       0.34x     Reverse         int  10000000
+tim                              6484.76       15302.57       0.42x     Reverse       float  10000000
+tim                             10236.72       42707.76       0.24x     Reverse      double  10000000
+tim                            125944.21       24965.57       5.04x  Nearly Sor         int  10000000
+tim                            139242.11       29134.68       4.78x  Nearly Sor       float  10000000
+tim                            158073.79       49215.67       3.21x  Nearly Sor      double  10000000
+tim                            575943.03       44955.64      12.81x  Few Unique         int  10000000
+tim                            679101.22       55378.60      12.26x  Few Unique       float  10000000
+tim                            712727.46       71586.11       9.96x  Few Unique      double  10000000
+
+============================================================
+Benchmark complete
+============================================================
+[0;32m[SUCCESS][0m Serial vs parallel comparison tests complete
+============================================================
+[0;32m[SUCCESS][0m All tasks completed!
+============================================================
